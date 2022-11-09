@@ -7,17 +7,22 @@ public class Exam {
     private int weekNum;
     private int periodNum;
     private int roomID;
+    private boolean set;
 
-    public Exam() {}
+    public Exam() {
+        this.set = false;
+    }
 
     public Exam(int examID) {
         this.examID = examID;
+        this.set = false;
     }
 
     public Exam(int examID, String examSub, String requiredRoomType) {
         this.examID = examID;
         this.examSub = examSub;
         this.requiredRoomType = requiredRoomType;
+        this.set = false;
     }
 
     public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students) {
@@ -26,6 +31,7 @@ public class Exam {
         this.requiredRoomType = requiredRoomType;
         this.classes = classes;
         this.students = students;
+        this.set = false;
     }
 
     public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students, int weekNum, int periodNum, int roomID) {
@@ -37,6 +43,7 @@ public class Exam {
         this.weekNum = weekNum;
         this.periodNum = periodNum;
         this.roomID = roomID;
+        this.set = false;
     }
 
     public int getExamID() {
