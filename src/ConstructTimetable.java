@@ -1,3 +1,5 @@
+import sun.awt.image.ImageWatched;
+
 public class ConstructTimetable {
     private Exam[] exams;
     private ConflictNode[][] TRC;
@@ -6,6 +8,16 @@ public class ConstructTimetable {
         this.exams = getExams();
         this.exams = sort(this.exams, 0, this.exams.length - 1);
         TRC = getTRC();
+        for (int i = 0; i < TRC.length; i++){
+            Exam[] workingSet = getUnsetExams();
+        }
+    }
+
+    private Exam[] getUnsetExams() {
+        LinkedList<Exam> tempUnsetExams = new LinkedList<>();
+        for (int i = 0; i < this.exams.length; i++) {
+            if (this.exams[i].)
+        }
     }
 
     private ConflictNode[][] getTRC() throws Exception {
