@@ -4,25 +4,24 @@ public class Exam {
     private String requiredRoomType;
     private int[] students;
     private int[] classes;
-    private int weekNum;
-    private int periodNum;
+    private Timeslot timeslot;
     private int roomID;
-    private boolean set;
+    private boolean examSet;
 
     public Exam() {
-        this.set = false;
+        this.examSet = false;
     }
 
     public Exam(int examID) {
         this.examID = examID;
-        this.set = false;
+        this.examSet = false;
     }
 
     public Exam(int examID, String examSub, String requiredRoomType) {
         this.examID = examID;
         this.examSub = examSub;
         this.requiredRoomType = requiredRoomType;
-        this.set = false;
+        this.examSet = false;
     }
 
     public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students) {
@@ -31,7 +30,7 @@ public class Exam {
         this.requiredRoomType = requiredRoomType;
         this.classes = classes;
         this.students = students;
-        this.set = false;
+        this.examSet = false;
     }
 
     public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students, int weekNum, int periodNum, int roomID) {
@@ -40,10 +39,21 @@ public class Exam {
         this.requiredRoomType = requiredRoomType;
         this.classes = classes;
         this.students = students;
-        this.weekNum = weekNum;
-        this.periodNum = periodNum;
         this.roomID = roomID;
-        this.set = false;
+        this.examSet = false;
+        this.timeslot = new Timeslot(weekNum, periodNum);
+    }
+
+    public void setTimeslot(int weekNum, int periodNum) {
+        this.timeslot = new Timeslot(weekNum, periodNum);
+    }
+
+    public void setTimeslot(Timeslot timeslot) {
+        this.timeslot = timeslot;
+    }
+
+    public Timeslot getTimeslot() {
+        return timeslot;
     }
 
     public int getExamID() {
@@ -66,29 +76,13 @@ public class Exam {
         return students.length;
     }
 
-    public void setTimeSlot(int weekNum, int periodNum) {
-        this.weekNum = weekNum;
-        this.periodNum = periodNum;
-    }
-
-    public int[] getTimeSlot() {
-        return new int[]{this.weekNum, this.periodNum};
-    }
 
     public int getWeekNum() {
-        return weekNum;
-    }
-
-    public void setWeekNum(int weekNum) {
-        this.weekNum = weekNum;
+        return this.timeslot.getWeekNum();
     }
 
     public int getPeriodNum() {
-        return periodNum;
-    }
-
-    public void setPeriodNum(int periodNum) {
-        this.periodNum = periodNum;
+        return this.timeslot.getPeriodNum();
     }
 
     public int getRoomID() {
@@ -117,5 +111,13 @@ public class Exam {
 
     public void setClasses(int[] classes) {
         this.classes = classes;
+    }
+
+    public boolean isExamSet() {
+        return examSet;
+    }
+
+    public void setExamSet(boolean examSet) {
+        this.examSet = examSet;
     }
 }
