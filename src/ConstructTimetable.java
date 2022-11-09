@@ -54,7 +54,7 @@ public class ConstructTimetable {
         }
     }
 
-    public Exam[] sort(Exam[] ar, int start, int end) throws Exception {
+    public Exam[] sort(Exam[] arr, int start, int end) throws Exception {
         if (start < end) {
             int middle = start + (end - start) / 2;
             sort(arr, start, middle);
