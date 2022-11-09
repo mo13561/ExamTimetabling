@@ -27,8 +27,8 @@ public class ConstructTimetable {
                 }
                 if (examSet) {
                     Exam[] conflictingExams = getConflictingExams(exam);
-                    for (int j = 0; j < conflictingExams.length; j++) {
-                        workingSet.remove(conflictingExams[j]);
+                    for (Exam conflictingExam : conflictingExams) {
+                        workingSet.remove(conflictingExam);
                     }
                 }
                 workingSet.remove(exam);
@@ -49,15 +49,15 @@ public class ConstructTimetable {
 
     private Exam[] getConflictingExams(Exam exam) throws Exception {
         LinkedList<Exam> tempConflictingExams = new LinkedList<>();
-        for (int i = 0; i < this.exams.length; i++) {
-            if (this.exams[i].getExamID() == exam.getExamID())
+        for (Exam value : this.exams) {
+            if (value.getExamID() == exam.getExamID())
                 continue;
             boolean conflictFlag = false;
-            int[] students = this.exams[i].getStudents();
-            for (int j = 0; j < students.length; j++) {
+            int[] students = value.getStudents();
+            for (int student : students) {
                 for (int k = 0; k < exam.enrolment(); k++) {
-                    if (exam.getStudents()[k] == students[j]) {
-                        tempConflictingExams.append(this.exams[i]);
+                    if (exam.getStudents()[k] == student) {
+                        tempConflictingExams.append(value);
                         conflictFlag = true;
                         break;
                     }
@@ -80,18 +80,18 @@ public class ConstructTimetable {
     }
 
     private boolean roomsAvailable(ConflictNode[] timeslot) {
-        for (int i = 0; i < timeslot.length; i++) {
-            if (timeslot[i].isAvailable())
+        for (ConflictNode conflictNode : timeslot) {
+            if (conflictNode.isAvailable())
                 return true;
         }
         return false;
     }
 
-    private LinkedList<Exam> getUnsetExams() throws Exception {
+    private LinkedList<Exam> getUnsetExams() {
         LinkedList<Exam> unsetExams = new LinkedList<>();
-        for (int i = 0; i < this.exams.length; i++) {
-            if (!this.exams[i].isExamSet()) {
-                unsetExams.append(this.exams[i]);
+        for (Exam exam : this.exams) {
+            if (!exam.isExamSet()) {
+                unsetExams.append(exam);
             }
         }
         return unsetExams;
