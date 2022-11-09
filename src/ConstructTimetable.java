@@ -2,7 +2,33 @@ public class ConstructTimetable {
     private Exam[] exams;
     private ConflictNode[][] TRC;
 
-    public Exam[][] getInitialSolution() throws Exception {
+    private Exam[] getConflictingExams(Exam exam) throws Exception {
+        LinkedList<Exam> tempConflictingExams = new LinkedList<>();
+        for (Exam value : this.exams) {
+            if (value.getExamID() == exam.getExamID())
+                continue;
+            boolean conflictFlag = false;
+            int[] students = value.getStudents();
+            for (int student : students) {
+                for (int k = 0; k < exam.enrolment(); k++) {
+                    if (exam.getStudents()[k] == student) {
+                        tempConflictingExams.append(value);
+                        conflictFlag = true;
+                        break;
+                    }
+                }
+                if (conflictFlag)
+                    break;
+            }
+        }
+        Exam[] conflictingExams = new Exam[tempConflictingExams.len()];
+        for (int i = 0; i < tempConflictingExams.len(); i++) {
+            conflictingExams[i] = tempConflictingExams.getValue(i);
+        }
+        return conflictingExams;
+    }
+
+    private Exam[][] getInitialSolution() throws Exception {
         this.exams = getExams();
         this.exams = sort(this.exams, 0, this.exams.length - 1); //sort by enrolment (merge sort)
         TRC = getTRC();
@@ -47,30 +73,33 @@ public class ConstructTimetable {
         return assignedExams;
     }
 
-    private Exam[] getConflictingExams(Exam exam) throws Exception {
-        LinkedList<Exam> tempConflictingExams = new LinkedList<>();
-        for (Exam value : this.exams) {
-            if (value.getExamID() == exam.getExamID())
-                continue;
-            boolean conflictFlag = false;
-            int[] students = value.getStudents();
-            for (int student : students) {
-                for (int k = 0; k < exam.enrolment(); k++) {
-                    if (exam.getStudents()[k] == student) {
-                        tempConflictingExams.append(value);
-                        conflictFlag = true;
-                        break;
-                    }
-                }
-                if (conflictFlag)
-                    break;
-            }
+    private Exam[][] localSearch(Exam[][] INIT_SOLUTION) {
+        int tenureShort = 9;
+        int maxLong = 4;
+        Exam[][] bestSol = INIT_SOLUTION;
+        Exam[][] currentSol = INIT_SOLUTION;
+        double fBest = costFunction(INIT_SOLUTION);
+        LinkedList<Move> shortTB = new LinkedList<>();
+        Move[] longTB = new Move[maxLong];
+        Hashmap<Exam, Integer> mvf = new Hashmap<>();
+        int iterNum = 0;
+        int bestIter = 0;
+        int nullIter = 7;
+        while (costFunction(bestSol) > 0 && (iterNum - bestIter) < nullIter) {
+            iterNum++;
+            Move[] Neighbourhood = getNeighbours(currentSol, shortTB, longTB, mvf, fBest);
         }
-        Exam[] conflictingExams = new Exam[tempConflictingExams.len()];
-        for (int i = 0; i < tempConflictingExams.len(); i++) {
-            conflictingExams[i] = tempConflictingExams.getValue(i);
-        }
-        return conflictingExams;
+        return new Exam[0][];
+    }
+
+    private Move[] getNeighbours(Exam[][] currentSol, LinkedList<Move> shortTB, Move[] longTB, Hashmap<Exam, Integer> mvf, double fBest) {
+        //TODO
+        return new Move[0];
+    }
+
+    private double costFunction(Exam[][] init_solution) {
+        //TODO
+        return 0;
     }
 
     private boolean examConstraintsSatisfied(Exam exam, ConflictNode timeRoom) {
