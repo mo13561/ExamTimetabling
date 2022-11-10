@@ -93,7 +93,25 @@ public class ConstructTimetable {
     }
 
     private Move[] getNeighbours(Exam[][] currentSol, LinkedList<Move> shortTB, Move[] longTB, Hashmap<Exam, Integer> mvf, double fBest) {
-        //TODO
+        /*
+        * for timeslot
+        * for all rooms in timeslot
+        * 
+        *
+        *
+        *
+        *
+        * */
+        LinkedList<Move> possMoves = new LinkedList<>();
+        for (int i = 0; i < currentSol.length; i++) {
+            for (int j = 0; j < currentSol[i].length; j++) {
+                for (int k = 0; k < TRC.length; k++) {
+                    for (int l = 0; l < TRC[k].length; l++) {
+                        if (TRC[k][l].getTimeslot() != currentSol[i][j].getTimeslot() && TRC[k][l].getTimeslot().)
+                    }
+                }
+            }
+        }
         return new Move[0];
     }
 
