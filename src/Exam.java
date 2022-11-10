@@ -5,7 +5,7 @@ public class Exam {
     private int[] students;
     private int[] classes;
     private Timeslot timeslot;
-    private int roomID;
+    private Room room;
     private boolean examSet;
 
     public Exam() {
@@ -33,13 +33,13 @@ public class Exam {
         this.examSet = false;
     }
 
-    public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students, int weekNum, int periodNum, int roomID) {
+    public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students, int weekNum, int periodNum, Room room) {
         this.examID = examID;
         this.examSub = examSub;
         this.requiredRoomType = requiredRoomType;
         this.classes = classes;
         this.students = students;
-        this.roomID = roomID;
+        this.room = room;
         this.examSet = false;
         this.timeslot = new Timeslot(weekNum, periodNum);
     }
@@ -85,14 +85,6 @@ public class Exam {
         return this.timeslot.getPeriodNum();
     }
 
-    public int getRoomID() {
-        return roomID;
-    }
-
-    public void setRoomID(int roomID) {
-        this.roomID = roomID;
-    }
-
     public void setRequiredRoomType(String requiredRoomType) {
         this.requiredRoomType = requiredRoomType;
     }
@@ -119,5 +111,13 @@ public class Exam {
 
     public void setExamSet(boolean examSet) {
         this.examSet = examSet;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
     }
 }

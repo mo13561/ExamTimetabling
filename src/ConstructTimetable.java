@@ -45,6 +45,7 @@ public class ConstructTimetable {
                     if (timeRoom.isAvailable() && examConstraintsSatisfied(exam, timeRoom)) {
                         timeRoom.setAvailable(false);
                         exam.setTimeslot(timeRoom.getTimeslot());
+                        exam.setRoom(timeRoom.getRoom());
                         exam.setExamSet(true);
                         currentTimeslotExams.append(exam);
                         examSet = true;
@@ -94,20 +95,28 @@ public class ConstructTimetable {
 
     private Move[] getNeighbours(Exam[][] currentSol, LinkedList<Move> shortTB, Move[] longTB, Hashmap<Exam, Integer> mvf, double fBest) {
         /*
-        * for timeslot
-        * for all rooms in timeslot
-        * 
-        *
+        * For exam
+        * For timeslot
+        * For room
+        * is possible? not in short tabu? not in long tabu? --> add.
         *
         *
         *
         * */
         LinkedList<Move> possMoves = new LinkedList<>();
-        for (int i = 0; i < currentSol.length; i++) {
+        for (int i = 0 ; i < currentSol.length; i++) {
             for (int j = 0; j < currentSol[i].length; j++) {
                 for (int k = 0; k < TRC.length; k++) {
                     for (int l = 0; l < TRC[k].length; l++) {
-                        if (TRC[k][l].getTimeslot() != currentSol[i][j].getTimeslot() && TRC[k][l].getTimeslot().)
+                        Exam currentExam = currentSol[i][j];
+                        ConflictNode timeRoom = TRC[k][l];
+                        if (timeRoom.isAvailable() && isValidMove(currentExam, timeRoom.getRoom())) {
+                            Move move = new Move(currentExam, timeRoom.getTimeslot(), timeRoom.getRoom());
+                            move.setCost(costFunction(getMovedSolution(currentSol, move)));
+                            possMoves.append(move);
+                        } else if (!timeRoom.isAvailable() && isValidSwap(currentExam, timeRoom)) {
+
+                        }
                     }
                 }
             }
@@ -115,9 +124,23 @@ public class ConstructTimetable {
         return new Move[0];
     }
 
-    private double costFunction(Exam[][] init_solution) {
+    private Exam[][] getMovedSolution(Exam[][] currentSol, Move move) {
+        //TODO
+        return new Exam[0][];
+    }
+
+    private double costFunction(Exam[][] solution) {
         //TODO
         return 0;
+    }
+
+    private boolean isValidSwap(Exam exam1, ConflictNode timeRoom) {
+        //TODO
+        return false;
+    }
+
+    private boolean isValidMove(Exam exam, Room roomTo) {
+        return exam.enrolment() <= roomTo.getCapacity() && exam.getRequiredRoomType().equals(roomTo.getType());
     }
 
     private boolean examConstraintsSatisfied(Exam exam, ConflictNode timeRoom) {
