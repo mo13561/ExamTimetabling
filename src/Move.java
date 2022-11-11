@@ -1,39 +1,35 @@
 public class Move {
-    private final Timeslot timeslot2;
-    private final Room room2;
-    private final Exam exam;
-    private double cost;
+    protected final Exam exam;
+    protected final Timeslot timeslotFrom;
+    protected final Timeslot timeslotTo;
+    protected final Room roomFrom;
+    protected final Room roomTo;
 
-    public Move(Exam exam, Timeslot timeslot2, Room room2) {
-        this.timeslot2 = timeslot2;
-        this.room2 = room2;
+    public Move(Exam exam, Timeslot timeslotTo, Room roomTo) {
         this.exam = exam;
-    }
-
-    public Move(Exam exam, Timeslot timeslot2, Room room2, double cost) {
-        this.timeslot2 = timeslot2;
-        this.room2 = room2;
-        this.exam = exam;
-        this.cost = cost;
-    }
-
-    public Timeslot getTimeslot2() {
-        return timeslot2;
+        this.roomFrom = exam.getRoom();
+        this.timeslotFrom = exam.getTimeslot();
+        this.roomTo = roomTo;
+        this.timeslotTo = timeslotTo;
     }
 
     public Exam getExam() {
         return exam;
     }
 
-    public double getCost() {
-        return cost;
+    public Timeslot getTimeslotFrom() {
+        return timeslotFrom;
     }
 
-    public void setCost(double cost) {
-        this.cost = cost;
+    public Timeslot getTimeslotTo() {
+        return timeslotTo;
     }
 
-    public Room getRoom2() {
-        return room2;
+    public Room getRoomFrom() {
+        return roomFrom;
+    }
+
+    public Room getRoomTo() {
+        return roomTo;
     }
 }
