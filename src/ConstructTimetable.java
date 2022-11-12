@@ -73,21 +73,16 @@ public class ConstructTimetable {
         }
         return assignedExams;
     }
-    /*TODO: change short tabu to pair with move tenure
-    * TODO: update MVF
-    * TODO: update long tabu
-    * TODO: IF BEST --> duplate current sol into best sol
-    * */
 
-    private Exam[][] localSearch(Exam[][] INIT_SOLUTION) throws Exception {
+    private Exam[][] localSearch(Exam[][] currentSol) throws Exception {
         int tenureShort = 9;
         int maxLong = 4;
-        Exam[][] bestSol = INIT_SOLUTION;
-        Exam[][] currentSol = INIT_SOLUTION;
-        double fBest = costFunction(INIT_SOLUTION);
-        LinkedList<Move> shortTB = new LinkedList<>(); //regard move as [exam, timeslot exam is from, room exam is from]
-        Move[] longTB = new Move[maxLong];
-        Hashmap<Exam, Integer> mvf = new Hashmap<>();
+        Exam[][] bestSol = deepDuplicateCurrentSol(currentSol);
+        double fBest = costFunction(currentSol);
+        double fCurrent = fBest;
+        LinkedList<MoveTenure> shortTB = new LinkedList<>(); //regard move as [exam, timeslot exam is from, room exam is from]
+        Exam[] longTB = new Exam[maxLong];
+        Hashmap<Integer, Integer> mvf = new Hashmap<>();
         int iterNum = 0;
         int bestIter = 0;
         int nullIter = 7;
@@ -95,35 +90,13 @@ public class ConstructTimetable {
             iterNum++;
             LinkedList<Swap> swaps = new LinkedList<>();
             LinkedList<Move> moves = new LinkedList<>();
-            Exam[][] newSol = new Exam[currentSol.length][];
-            for (int i = 0; i < this.exams.length; i++) {
-                for (int j = i + 1; j < this.exams.length; j++) {
-                    Exam exam1 = this.exams[i];
-                    Exam exam2 = this.exams[j];
-                    if (exam1.enrolment() <= exam2.getRoom().getCapacity() && exam1.getRequiredRoomType().equals(exam2.getRequiredRoomType())
-                            && moveNotInLongTB(longTB, exam1) && moveNotInLongTB(longTB, exam2)) {
-                        swaps.append(new Swap(exam1, exam2));
-                    }
-                }
+            getSwaps(swaps, shortTB, longTB, currentSol, fBest);
+            getMoves(moves, shortTB, longTB, currentSol, fBest);
+            if (swaps.len() == 0 && moves.len() == 0) { //no more moves possible so stop local search
+                iterNum = Integer.MAX_VALUE;
+                continue;
             }
-            for (ConflictNode[] timeslot : TRC) {
-                for (ConflictNode timeRoom : timeslot) {
-                    if (!timeRoom.isAvailable())
-                        continue;
-                    for (Exam exam : this.exams) {
-                        if (exam.enrolment() <= timeRoom.getRoom().getCapacity() && exam.getRequiredRoomType().equals(timeRoom.getRoom().getType()) && moveNotInLongTB(longTB, exam)) {
-                            moves.append(new Move(exam, timeRoom.getTimeslot(), timeRoom.getRoom()));
-                        }
-                    }
-                }
-            }
-            for (int i = 0; i < swaps.len(); i++) {
-                if (!swapNotInShortTB(swaps.getValue(i), shortTB) && getSwapCost(currentSol, swaps.getValue(i)) > fBest) {
-                    swaps.remove(swaps.getValue(i));
-                    i--;
-                }
-            }
-            Swap bestSwap = null;
+            Swap bestSwap = null; //get best swap
             int bestSwapCost = -1;
             if (!swaps.isEmpty()) {
                 bestSwap = swaps.getValue(0);
@@ -136,13 +109,7 @@ public class ConstructTimetable {
                     }
                 }
             }
-            for (int i = 0; i < moves.len(); i++) {
-                if (!moveNotInShortTB(shortTB, moves.getValue(i).getExam()) && getMoveCost(currentSol, moves.getValue(i)) > fBest) {
-                    moves.remove(swaps.getValue(i));
-                    i--;
-                }
-            }
-            Move bestMove = null;
+            Move bestMove = null; //get best move
             int bestMoveCost = -1;
             if (!moves.isEmpty()) {
                 bestMove = moves.getValue(0);
@@ -155,7 +122,11 @@ public class ConstructTimetable {
                     }
                 }
             }
-            if (bestMoveCost <= bestSwapCost && bestMove != null) { //we do a move
+            if (bestMoveCost < bestSwapCost && bestMove != null) { //we do a move
+                updateShortTBWithMove(shortTB, bestMove, tenureShort);
+                updateMVFWithExam(mvf, bestMove.getExam());
+                updateLongTBWithMove(longTB, mvf, bestMove.getExam());
+                fCurrent = bestMoveCost;
                 int timeFrom = 0;
                 int timeTo = 0;
                 for (int i = 0; i < TRC.length; i++) {
@@ -199,7 +170,11 @@ public class ConstructTimetable {
                         }
                     }
                 }
-            } else if (bestMoveCost > bestSwapCost && bestSwap != null) { //we do a swap
+            } else if (bestMoveCost >= bestSwapCost && bestSwap != null) { //we do a swap
+                updateShortTBWithSwap(shortTB, bestSwap, tenureShort);
+                updateMVFWithSwap(mvf, bestSwap);
+                updateLongTBWithSwap(longTB, mvf, bestSwap);
+                fCurrent = bestSwapCost;
                 int timeFrom = 0;
                 int timeTo = 0;
                 for (int i = 0; i < TRC.length; i++) {
@@ -225,47 +200,167 @@ public class ConstructTimetable {
                     }
                 }
             }
-
-            for (int i = 0; i < shortTB.len(); i++) {
-                //TODO
+            if (fCurrent <= fBest) { //if current solution better than or as good as best solution
+                bestSol = deepDuplicateCurrentSol(currentSol);
+                fBest = fCurrent;
+                bestIter = iterNum;
             }
         }
-        return new Exam[0][];
+        return bestSol;
+    }
+
+    private void getMoves(LinkedList<Move> moves, LinkedList<MoveTenure> shortTB, Exam[] longTB, Exam[][] currentSol, double fBest) throws Exception {
+        for (ConflictNode[] timeslot : TRC) { //searching for moves
+            for (ConflictNode timeRoom : timeslot) {
+                if (!timeRoom.isAvailable())
+                    continue;
+                for (Exam exam : this.exams) {
+                    if (exam.enrolment() <= timeRoom.getRoom().getCapacity() && exam.getRequiredRoomType().equals(timeRoom.getRoom().getType()) && moveNotInLongTB(longTB, exam)) {
+                        moves.append(new Move(exam, timeRoom.getTimeslot(), timeRoom.getRoom()));
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < moves.len(); i++) {
+            if (!moveNotInShortTB(shortTB, moves.getValue(i).getExam()) && getMoveCost(currentSol, moves.getValue(i)) > fBest) {
+                moves.remove(moves.getValue(i));
+                i--;
+            }
+        }
+    }
+
+    private void getSwaps(LinkedList<Swap> swaps, LinkedList<MoveTenure> shortTB, Exam[] longTB, Exam[][] currentSol, double fBest) throws Exception {
+        for (int i = 0; i < this.exams.length; i++) { //searching for swaps
+            for (int j = i + 1; j < this.exams.length; j++) {
+                Exam exam1 = this.exams[i];
+                Exam exam2 = this.exams[j];
+                if (exam1.enrolment() <= exam2.getRoom().getCapacity() && exam1.getRequiredRoomType().equals(exam2.getRequiredRoomType())
+                        && moveNotInLongTB(longTB, exam1) && moveNotInLongTB(longTB, exam2)) {
+                    swaps.append(new Swap(exam1, exam2));
+                }
+            }
+        }
+        for (int i = 0; i < swaps.len(); i++) {
+            if (!swapNotInShortTB(swaps.getValue(i), shortTB) && getSwapCost(currentSol, swaps.getValue(i)) > fBest) {
+                swaps.remove(swaps.getValue(i));
+                i--;
+            }
+        }
+    }
+
+    private Exam[][] deepDuplicateCurrentSol(Exam[][] currentSol) {
+        Exam[][] duplicate = new Exam[currentSol.length][];
+        for (int i = 0; i < currentSol.length; i++) {
+            Exam[] tempTimeslot = new Exam[currentSol[i].length];
+            for (int j = 0; j < currentSol[i].length; j++) {
+                Exam original = currentSol[i][j];
+                tempTimeslot[j] = new Exam(original.getExamID(), original.getExamSub(), original.getRequiredRoomType(),
+                        original.getClasses(), original.getStudents(), original.getWeekNum(), original.getPeriodNum(), original.getRoom());
+            }
+            duplicate[i] = tempTimeslot;
+        }
+        return duplicate;
+    }
+
+    private void updateLongTBWithSwap(Exam[] longTB, Hashmap<Integer, Integer> mvf, Swap bestSwap) {
+        updateLongTBWithMove(longTB, mvf, bestSwap.getExam());
+        updateLongTBWithMove(longTB, mvf, bestSwap.getExam2());
+    }
+
+    private void updateLongTBWithMove(Exam[] longTB, Hashmap<Integer, Integer> mvf, Exam exam) {
+        if (mvf.item(exam.getExamID()) > 2) {
+            boolean isFull = true;
+            for (int i = 0; i < longTB.length; i++) {
+                if (longTB[i] == null) {
+                    isFull = false;
+                    longTB[i] = exam;
+                    break;
+                }
+            }
+            if (isFull) {
+                int leastActiveExamInLongTB = 0;
+                for (int i = 1; i < longTB.length; i++) {
+                    if (mvf.item(longTB[leastActiveExamInLongTB].getExamID()) >= mvf.item(longTB[i].getExamID())) {
+                        leastActiveExamInLongTB = i;
+                    }
+                }
+                longTB[leastActiveExamInLongTB] = exam;
+            }
+        }
+    }
+
+    private void updateMVFWithSwap(Hashmap<Integer, Integer> mvf, Swap bestSwap) throws Exception {
+        updateMVFWithExam(mvf, bestSwap.getExam());
+        updateMVFWithExam(mvf, bestSwap.getExam2());
+    }
+
+    private void updateMVFWithExam(Hashmap<Integer, Integer> mvf, Exam exam) throws Exception {
+        if (mvf.contains(exam.getExamID())) {
+            int freq = mvf.item(exam.getExamID());
+            mvf.delete(exam.getExamID());
+            mvf.add(exam.getExamID(), freq + 1);
+        } else {
+            mvf.add(exam.getExamID(), 1);
+        }
+    }
+
+    private void updateShortTBWithSwap(LinkedList<MoveTenure> shortTB, Swap bestSwap, int tenureShort) throws Exception {
+        Move move1 = new Move(bestSwap.getExam(), bestSwap.getTimeslotTo(), bestSwap.getRoomTo());
+        Move move2 = new Move(bestSwap.getExam2(), bestSwap.getTimeslotFrom(), bestSwap.getRoomFrom());
+        updateShortTBWithMove(shortTB, move1, tenureShort);
+        updateShortTBWithMove(shortTB, move2, tenureShort);
+    }
+
+    private void updateShortTBWithMove(LinkedList<MoveTenure> shortTB, Move bestMove, int tenureShort) throws Exception {
+        boolean bestMoveInShortTB = false;
+        for (int i = 0; i < shortTB.len(); i++) {
+            shortTB.getValue(i).decrementTenure();
+            if (moveNotInShortTB(shortTB, bestMove.getExam())) {
+                if (shortTB.getValue(i).tenureZero()) {
+                    shortTB.remove(shortTB.getValue(i));
+                }
+            } else {
+                bestMoveInShortTB = true;
+                shortTB.remove(shortTB.getValue(i));
+            }
+        }
+        if (!bestMoveInShortTB) {
+            shortTB.append(new MoveTenure(bestMove, tenureShort));
+        }
     }
 
     private int getMoveCost(Exam[][] currentSol, Move bestMove) {
-        //TODO
+        //TODO move cost
         return 0;
     }
 
     private int getSwapCost(Exam[][] currentSol, Swap value) {
-        //TODO
+        //TODO swap cost
         return 0;
     }
 
     private double costFunction(Exam[][] solution) {
-        //TODO
+        //TODO cost function
         return 0;
     }
 
-    private boolean swapNotInShortTB(Swap swap, LinkedList<Move> shortTB) throws Exception {
+    private boolean swapNotInShortTB(Swap swap, LinkedList<MoveTenure> shortTB) throws Exception {
         return moveNotInShortTB(shortTB, swap.getExam()) && moveNotInShortTB(shortTB, swap.getExam2());
     }
 
-    private boolean moveNotInLongTB(Move[] longTB, Exam exam1) {
-        for (Move move : longTB) {
-            if (move.getExam().getExamID() == exam1.getExamID() && move.getRoomFrom().getRoomID() == exam1.getRoom().getRoomID()
-                    && move.getTimeslotFrom().getPeriodNum() == exam1.getPeriodNum() && move.getTimeslotFrom().getWeekNum() == exam1.getWeekNum()) {
+    private boolean moveNotInLongTB(Exam[] longTB, Exam exam1) {
+        for (Exam exam : longTB) {
+            if (exam.getExamID() == exam1.getExamID()) {
                 return false;
             }
         }
         return true;
     }
 
-    private boolean moveNotInShortTB(LinkedList<Move> shortTB, Exam exam1) throws Exception {
+    private boolean moveNotInShortTB(LinkedList<MoveTenure> shortTB, Exam exam1) throws Exception {
         for (int i = 0; i < shortTB.len(); i++) {
-            if (shortTB.getValue(i).getExam().getExamID() == exam1.getExamID() && shortTB.getValue(i).getRoomFrom().getRoomID() == exam1.getRoom().getRoomID()
-                    && shortTB.getValue(i).getTimeslotFrom().getPeriodNum() == exam1.getPeriodNum() && shortTB.getValue(i).getTimeslotFrom().getWeekNum() == exam1.getWeekNum()) {
+            if (shortTB.getValue(i).getMove().getExam().getExamID() == exam1.getExamID() && shortTB.getValue(i).getMove().getRoomFrom().getRoomID() == exam1.getRoom().getRoomID()
+                    && shortTB.getValue(i).getMove().getTimeslotFrom().getPeriodNum() == exam1.getPeriodNum() && shortTB.getValue(i).getMove().getTimeslotFrom().getWeekNum() == exam1.getWeekNum()) {
                 return false;
             }
         }
