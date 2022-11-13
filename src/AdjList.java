@@ -66,7 +66,7 @@ public class AdjList<G> {//generic adjacency list made with generic Hashmap
     }
 
     public LinkedList<LinkedList<DNode>> getLinkedAdjList() {
-        LinkedList<LinkedList<DNode>> linkedAdj = new LinkedList<LinkedList<DNode>>();
+        LinkedList<LinkedList<DNode>> linkedAdj = new LinkedList<>();
         Hashmap.KeyValue[] nodes = getNodes();
         for (int i = 0; i < nodes.length; i++) {
             if (nodes[i] == null) continue;

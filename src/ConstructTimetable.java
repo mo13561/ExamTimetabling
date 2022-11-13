@@ -127,47 +127,20 @@ public class ConstructTimetable {
                 updateMVFWithExam(mvf, bestMove.getExam());
                 updateLongTBWithMove(longTB, mvf, bestMove.getExam());
                 fCurrent = bestMoveCost;
-                int timeFrom = 0;
-                int timeTo = 0;
-                for (int i = 0; i < TRC.length; i++) {
-                    if (TRC[i][0].getTimeslot().getWeekNum() == bestMove.getTimeslotFrom().getWeekNum() && TRC[i][0].getTimeslot().getPeriodNum() == bestMove.getTimeslotFrom().getPeriodNum()) {
-                        timeFrom = i;
-                    }
-                    if (TRC[i][0].getTimeslot().getWeekNum() == bestMove.getTimeslotTo().getWeekNum() && TRC[i][0].getTimeslot().getPeriodNum() == bestMove.getTimeslotTo().getPeriodNum()) {
-                        timeTo = i;
+                int[] times = getTimesForMove(bestMove);
+                int timeFrom = times[0];
+                int timeTo = times[1];
+                performMove(currentSol, timeFrom, timeTo, bestMove);
+                for (int j = 0; j < TRC[timeFrom].length; j++) { //update room availability after move
+                    if (TRC[timeFrom][j].getRoom().getRoomID() == bestMove.getRoomFrom().getRoomID()) {
+                        TRC[timeFrom][j].setAvailable(true);
+                        break;
                     }
                 }
-                for (int i = 0; i < currentSol[timeFrom].length; i++) {
-                    if (currentSol[timeFrom][i].getExamID() == bestMove.getExam().getExamID()) {
-                        Exam examFrom = currentSol[timeFrom][i];
-                        examFrom.setTimeslot(bestMove.getTimeslotTo());
-                        LinkedList<Exam> tempExamsFrom = new LinkedList<>();
-                        for (int j = 0; j < currentSol[timeFrom].length; j++) {
-                            if (j != i) {
-                                tempExamsFrom.append(currentSol[timeFrom][j]);
-                            }
-                        }
-                        Exam[] tempExamCollection = new Exam[tempExamsFrom.len()];
-                        for (int j = 0; j < tempExamCollection.length; j++) {
-                            tempExamCollection[j] = tempExamsFrom.getValue(i);
-                        }
-                        currentSol[timeFrom] = tempExamCollection;
-                        Exam[] tempExamCollection2 = new Exam[currentSol[timeTo].length + 1];
-                        System.arraycopy(currentSol[timeTo],0,tempExamCollection2,0,currentSol[timeTo].length);
-                        tempExamCollection2[tempExamCollection2.length - 1] = examFrom;
-                        currentSol[timeTo] = tempExamCollection2;
-                        for (int j = 0; j < TRC[timeFrom].length; j++) {
-                            if (TRC[timeFrom][j].getRoom().getRoomID() == bestMove.getRoomFrom().getRoomID()) {
-                                TRC[timeFrom][j].setAvailable(true);
-                                break;
-                            }
-                        }
-                        for (int j = 0; j < TRC[timeTo].length; j++) {
-                            if (TRC[timeTo][j].getRoom().getRoomID() == bestMove.getRoomTo().getRoomID()) {
-                                TRC[timeTo][j].setAvailable(false);
-                                break;
-                            }
-                        }
+                for (int j = 0; j < TRC[timeTo].length; j++) {
+                    if (TRC[timeTo][j].getRoom().getRoomID() == bestMove.getRoomTo().getRoomID()) {
+                        TRC[timeTo][j].setAvailable(false);
+                        break;
                     }
                 }
             } else if (bestMoveCost >= bestSwapCost && bestSwap != null) { //we do a swap
@@ -175,31 +148,11 @@ public class ConstructTimetable {
                 updateMVFWithSwap(mvf, bestSwap);
                 updateLongTBWithSwap(longTB, mvf, bestSwap);
                 fCurrent = bestSwapCost;
-                int timeFrom = 0;
-                int timeTo = 0;
-                for (int i = 0; i < TRC.length; i++) {
-                    if (TRC[i][0].getTimeslot().getWeekNum() == bestSwap.getTimeslotFrom().getWeekNum() && TRC[i][0].getTimeslot().getPeriodNum() == bestSwap.getTimeslotFrom().getPeriodNum()) {
-                        timeFrom = i;
-                    }
-                    if (TRC[i][0].getTimeslot().getWeekNum() == bestSwap.getTimeslotTo().getWeekNum() && TRC[i][0].getTimeslot().getPeriodNum() == bestSwap.getTimeslotTo().getPeriodNum()) {
-                        timeTo = i;
-                    }
-                }
-                for (int i = 0; i < currentSol[timeFrom].length; i++) {
-                    if (currentSol[timeFrom][i].getExamID() == bestSwap.getExam().getExamID()) {
-                        for (int j = 0; j < currentSol[timeTo].length; j++) {
-                            if (currentSol[timeTo][j].getExamID() == bestSwap.getExam2().getExamID()) {
-                                currentSol[timeFrom][i].setTimeslot(bestSwap.getTimeslotTo());
-                                currentSol[timeTo][j].setTimeslot(bestSwap.getTimeslotFrom());
-                                currentSol[timeFrom][i].setRoom(bestSwap.getRoomTo());
-                                currentSol[timeTo][j].setRoom(bestSwap.getRoomFrom());
-                                currentSol[timeFrom][i] = currentSol[timeFrom][j];
-                                currentSol[timeFrom][j] = bestSwap.getExam();
-                            }
-                        }
-                    }
-                }
-            }
+                int[] times = getTimesForSwap(bestSwap);
+                int timeFrom = times[0];
+                int timeTo = times[1];
+                performSwap(currentSol, bestSwap, timeFrom, timeTo);
+            } //room availability remains same as we just swap what exams are happening in the rooms
             if (fCurrent <= fBest) { //if current solution better than or as good as best solution
                 bestSol = deepDuplicateCurrentSol(currentSol);
                 fBest = fCurrent;
@@ -207,6 +160,62 @@ public class ConstructTimetable {
             }
         }
         return bestSol;
+    }
+
+    private void performSwap(Exam[][] currentSol, Swap bestSwap, int timeFrom, int timeTo) {
+        for (int i = 0; i < currentSol[timeFrom].length; i++) {
+            if (currentSol[timeFrom][i].getExamID() == bestSwap.getExam().getExamID()) {
+                for (int j = 0; j < currentSol[timeTo].length; j++) {
+                    if (currentSol[timeTo][j].getExamID() == bestSwap.getExam2().getExamID()) {
+                        currentSol[timeFrom][i].setTimeslot(bestSwap.getTimeslotTo());
+                        currentSol[timeTo][j].setTimeslot(bestSwap.getTimeslotFrom());
+                        currentSol[timeFrom][i].setRoom(bestSwap.getRoomTo());
+                        currentSol[timeTo][j].setRoom(bestSwap.getRoomFrom());
+                        currentSol[timeFrom][i] = currentSol[timeFrom][j];
+                        currentSol[timeFrom][j] = bestSwap.getExam();
+                    }
+                }
+            }
+        }
+    }
+
+    private int[] getTimesForSwap(Swap bestSwap) {
+        int timeFrom = 0;
+        int timeTo = 0;
+        for (int i = 0; i < TRC.length; i++) {
+            if (TRC[i][0].getTimeslot().getWeekNum() == bestSwap.getTimeslotFrom().getWeekNum() && TRC[i][0].getTimeslot().getPeriodNum() == bestSwap.getTimeslotFrom().getPeriodNum()) {
+                timeFrom = i;
+            }
+            if (TRC[i][0].getTimeslot().getWeekNum() == bestSwap.getTimeslotTo().getWeekNum() && TRC[i][0].getTimeslot().getPeriodNum() == bestSwap.getTimeslotTo().getPeriodNum()) {
+                timeTo = i;
+            }
+        }
+        return new int[]{timeFrom, timeTo};
+    }
+
+    private void performMove(Exam[][] currentSol, int timeFrom, int timeTo, Move bestMove) throws Exception {
+        for (int i = 0; i < currentSol[timeFrom].length; i++) {
+            if (currentSol[timeFrom][i].getExamID() == bestMove.getExam().getExamID()) {
+                Exam examFrom = currentSol[timeFrom][i];
+                examFrom.setTimeslot(bestMove.getTimeslotTo());
+                examFrom.setRoom(bestMove.getRoomTo());
+                LinkedList<Exam> tempExamsFrom = new LinkedList<>();
+                for (int j = 0; j < currentSol[timeFrom].length; j++) {
+                    if (j != i) {
+                        tempExamsFrom.append(currentSol[timeFrom][j]);
+                    }
+                }
+                Exam[] tempExamCollection = new Exam[tempExamsFrom.len()];
+                for (int j = 0; j < tempExamCollection.length; j++) {
+                    tempExamCollection[j] = tempExamsFrom.getValue(i);
+                }
+                currentSol[timeFrom] = tempExamCollection;
+                Exam[] tempExamCollection2 = new Exam[currentSol[timeTo].length + 1];
+                System.arraycopy(currentSol[timeTo],0,tempExamCollection2,0,currentSol[timeTo].length);
+                tempExamCollection2[tempExamCollection2.length - 1] = examFrom;
+                currentSol[timeTo] = tempExamCollection2;
+            }
+        }
     }
 
     private void getMoves(LinkedList<Move> moves, LinkedList<MoveTenure> shortTB, Exam[] longTB, Exam[][] currentSol, double fBest) throws Exception {
@@ -329,19 +338,75 @@ public class ConstructTimetable {
         }
     }
 
-    private int getMoveCost(Exam[][] currentSol, Move bestMove) {
-        //TODO move cost
-        return 0;
+    private int getMoveCost(Exam[][] currentSol, Move move) throws Exception {
+        Exam[][] tempSol = deepDuplicateCurrentSol(currentSol);
+        int[] times = getTimesForMove(move);
+        int timeFrom = times[0];
+        int timeTo = times[1];
+        performMove(tempSol, timeFrom, timeTo, move);
+        return costFunction(tempSol);
     }
 
-    private int getSwapCost(Exam[][] currentSol, Swap value) {
-        //TODO swap cost
-        return 0;
+    private int[] getTimesForMove(Move move) {
+        int timeFrom = 0;
+        int timeTo = 0;
+        for (int i = 0; i < TRC.length; i++) {
+            if (TRC[i][0].getTimeslot().getWeekNum() == move.getTimeslotFrom().getWeekNum() && TRC[i][0].getTimeslot().getPeriodNum() == move.getTimeslotFrom().getPeriodNum()) {
+                timeFrom = i;
+            }
+            if (TRC[i][0].getTimeslot().getWeekNum() == move.getTimeslotTo().getWeekNum() && TRC[i][0].getTimeslot().getPeriodNum() == move.getTimeslotTo().getPeriodNum()) {
+                timeTo = i;
+            }
+        }
+        return new int[]{timeFrom, timeTo};
     }
 
-    private double costFunction(Exam[][] solution) {
-        //TODO cost function
-        return 0;
+    private int getSwapCost(Exam[][] currentSol, Swap swap) throws Exception {
+        Exam[][] tempSol = deepDuplicateCurrentSol(currentSol);
+        int[] times = getTimesForSwap(swap);
+        int timeFrom = times[0];
+        int timeTo = times[1];
+        performSwap(tempSol, swap, timeFrom, timeTo);
+        return costFunction(tempSol);
+    }
+
+    private int costFunction(Exam[][] solution) throws Exception {
+        int weight1 = 8;
+        int weight2 = 3;
+        int totalConsec = 0;
+        int wastedSpace = 0;
+        for (int i = 0; i < solution.length - 1; i++) {
+            Hashset<Integer> students = new Hashset<>();
+            if (solution[i].length > 0 && solution[i + 1].length > 0 && examsInConsecTimeslots(solution[i][0], solution[i+1][0])) {
+                for (int j = 0; j < solution[i].length; j++) {
+                    for (int k = 0; k < solution[i][j].enrolment(); k++) {
+                        students.add(solution[i][j].getStudents()[k]);
+                    }
+                }
+                for (int j = 0; j < solution[i + 1].length; j++) {
+                    for (int k = 0; k < solution[i + 1][j].enrolment(); k++) {
+                        students.add(solution[i][j].getStudents()[k]);
+                    }
+                }
+                totalConsec += students.length();
+            }
+        }
+        for (Exam[] timeslot : solution) {
+            for (Exam exam : timeslot) {
+                wastedSpace += exam.getRoom().getCapacity() - exam.enrolment();
+            }
+        }
+        return (weight1 * totalConsec) + (weight2 * wastedSpace);
+    }
+
+    private boolean examsInConsecTimeslots(Exam exam, Exam exam1) {
+        /* iff they are one period apart,
+         * on the same week,
+         * and on the same day (the earlier exam is not on the last period of a day)
+         * */
+        return (Math.abs(exam.getPeriodNum() - exam1.getPeriodNum()) == 1
+                && exam.getWeekNum() == exam1.getWeekNum()
+                && Math.min(exam.getPeriodNum(), exam1.getPeriodNum()) % 7 != 0);
     }
 
     private boolean swapNotInShortTB(Swap swap, LinkedList<MoveTenure> shortTB) throws Exception {

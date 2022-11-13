@@ -173,7 +173,7 @@ public class LinkedList<G> {
         if (this.front.getValue().toString().equals(value.toString()) || this.rear.getValue().toString().equals(value.toString())) {
             return true;
         } else {
-            return this.len() > 1 ? contains(value, this.front.next) : false;
+            return this.len() > 1 && contains(value, this.front.next);
         }
     }
 

@@ -7,7 +7,7 @@ public class DatabaseConnect
 {
     private static Connection conn = null;
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         DatabaseConnect conn = new DatabaseConnect();
         //conn.createTable();
         //conn.insert();
@@ -106,7 +106,6 @@ public class DatabaseConnect
             }
             rs.close();
             stmt.close();
-            bSelect = true;
         }
         catch (SQLException e)
         {
@@ -136,7 +135,6 @@ public class DatabaseConnect
             }
             rs.close();
             stmt.close();
-            bSelect = true;
         }
         catch (SQLException e)
         {
@@ -182,7 +180,6 @@ public class DatabaseConnect
             }
             rs.close();
             stmt.close();
-            bSelect = true;
         }
         catch (SQLException e)
         {
@@ -207,7 +204,6 @@ public class DatabaseConnect
             }
             rs.close();
             stmt.close();
-            bSelect = true;
         }
         catch (SQLException e)
         {
@@ -236,7 +232,6 @@ public class DatabaseConnect
             }
             rs.close();
             stmt.close();
-            bSelect = true;
         }
         catch (SQLException e)
         {

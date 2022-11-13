@@ -70,7 +70,7 @@ public class Hashmap<K, T> {//generic hashmap modulus 11, dynamic.
         return numKey;
     }
 
-    public void add(K key, T value) throws Exception {
+    public void add(K key, T value) throws IllegalArgumentException {
         if (isFull()) {
             enlarge();
         }
@@ -86,9 +86,7 @@ public class Hashmap<K, T> {//generic hashmap modulus 11, dynamic.
         this.maxSize *= 2;
         KeyValue<T>[] temp = map;
         map = new KeyValue[this.maxSize];
-        for (int i = 0; i < temp.length; i++) {
-            map[i] = temp[i];
-        }
+        System.arraycopy(temp, 0, map, 0, temp.length);
     }
 
     public void delete(K key) throws IllegalArgumentException {
@@ -184,6 +182,8 @@ public class Hashmap<K, T> {//generic hashmap modulus 11, dynamic.
     }
 
     public boolean contains(K genKey) {
+        if (isEmpty())
+            return false;
         int key = keyToInt(genKey);
         int pos = key % this.modulus;
         for (int i = 0; i < this.maxSize; i++) {
@@ -197,6 +197,8 @@ public class Hashmap<K, T> {//generic hashmap modulus 11, dynamic.
     }
 
     public boolean contains(int key) {
+        if (isEmpty())
+            return false;
         int pos = key % this.modulus;
         for (int i = 0; i < this.maxSize; i++) {
             if (map[pos] == null) {

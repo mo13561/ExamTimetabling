@@ -1,6 +1,6 @@
 public class ConflictNode {
-    private Timeslot timeslot;
-    private Room room;
+    private final Timeslot timeslot;
+    private final Room room;
     private boolean available;
 
     public ConflictNode (int weekNum, int periodNum, int roomID, int capacity, String roomType, boolean available) throws Exception {
@@ -9,7 +9,7 @@ public class ConflictNode {
         this.room = new Room(roomID, capacity, roomType);
     }
 
-    public ConflictNode (int weekNum, int periodNum, Room room, boolean available) throws Exception {
+    public ConflictNode (int weekNum, int periodNum, Room room, boolean available) {
         this.available = available;
         this.timeslot = new Timeslot(weekNum, periodNum);
         this.room = room;
