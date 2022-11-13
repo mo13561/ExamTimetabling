@@ -351,10 +351,12 @@ public class ConstructTimetable {
         int timeFrom = 0;
         int timeTo = 0;
         for (int i = 0; i < TRC.length; i++) {
-            if (TRC[i][0].getTimeslot().getWeekNum() == move.getTimeslotFrom().getWeekNum() && TRC[i][0].getTimeslot().getPeriodNum() == move.getTimeslotFrom().getPeriodNum()) {
+            if (TRC[i][0].getTimeslot().getWeekNum() == move.getTimeslotFrom().getWeekNum()
+                    && TRC[i][0].getTimeslot().getPeriodNum() == move.getTimeslotFrom().getPeriodNum()) {
                 timeFrom = i;
             }
-            if (TRC[i][0].getTimeslot().getWeekNum() == move.getTimeslotTo().getWeekNum() && TRC[i][0].getTimeslot().getPeriodNum() == move.getTimeslotTo().getPeriodNum()) {
+            if (TRC[i][0].getTimeslot().getWeekNum() == move.getTimeslotTo().getWeekNum()
+                    && TRC[i][0].getTimeslot().getPeriodNum() == move.getTimeslotTo().getPeriodNum()) {
                 timeTo = i;
             }
         }
@@ -424,8 +426,10 @@ public class ConstructTimetable {
 
     private boolean moveNotInShortTB(LinkedList<MoveTenure> shortTB, Exam exam1) throws Exception {
         for (int i = 0; i < shortTB.len(); i++) {
-            if (shortTB.getValue(i).getMove().getExam().getExamID() == exam1.getExamID() && shortTB.getValue(i).getMove().getRoomFrom().getRoomID() == exam1.getRoom().getRoomID()
-                    && shortTB.getValue(i).getMove().getTimeslotFrom().getPeriodNum() == exam1.getPeriodNum() && shortTB.getValue(i).getMove().getTimeslotFrom().getWeekNum() == exam1.getWeekNum()) {
+            if (shortTB.getValue(i).getMove().getExam().getExamID() == exam1.getExamID()
+                    && shortTB.getValue(i).getMove().getRoomFrom().getRoomID() == exam1.getRoom().getRoomID()
+                    && shortTB.getValue(i).getMove().getTimeslotFrom().getPeriodNum() == exam1.getPeriodNum()
+                    && shortTB.getValue(i).getMove().getTimeslotFrom().getWeekNum() == exam1.getWeekNum()) {
                 return false;
             }
         }
