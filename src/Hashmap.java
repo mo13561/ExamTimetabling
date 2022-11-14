@@ -41,7 +41,7 @@ public class Hashmap<K, T> {//generic hashmap modulus 11, dynamic.
         }
     }
     private int maxSize = 11;
-    private final int modulus = 11;
+    private int modulus = 11;
     private int length = 0;
     KeyValue<T>[] map;
 
@@ -84,6 +84,7 @@ public class Hashmap<K, T> {//generic hashmap modulus 11, dynamic.
 
     private void enlarge() {
         this.maxSize *= 2;
+        this.modulus = this.maxSize;
         KeyValue<T>[] temp = map;
         map = new KeyValue[this.maxSize];
         System.arraycopy(temp, 0, map, 0, temp.length);

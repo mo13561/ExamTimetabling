@@ -166,7 +166,7 @@ public class LinkedList<G> {
         return removed.getValue();
     }
 
-    public boolean search(G value) {
+    public boolean contains(G value) {
         if (this.len() == 0) {
             return false;
         }
@@ -202,14 +202,14 @@ public class LinkedList<G> {
 
     public String toString() {//toString method to display queue
         if (isEmpty()) return "";
-        String list = "" + this.front.getValue();//making it look nice
+        StringBuilder list = new StringBuilder("" + this.front.getValue());//making it look nice
         Node traversal = this.front.next;
         for (int i = 0; i < this.length - 1; i++) {
-            list += " <- " + traversal.getValue();
+            list.append(" <- ").append(traversal.getValue());
             if (traversal.next != null) {
                 traversal = traversal.next;
             }
         }
-        return list;
+        return list.toString();
     }
 }

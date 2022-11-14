@@ -1,5 +1,4 @@
 import java.sql.*;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +20,7 @@ public class DatabaseConnect
         try
         {
             Class.forName("org.sqlite.JDBC");//Specify the SQLite Java driver
-            conn = DriverManager.getConnection("jdbc:sqlite:FINALDBMOVIERENT (1).db");//Specify the database, since relative in the main project folder
+            conn = DriverManager.getConnection("jdbc:sqlite:TimetablingDB.db");//Specify the database, since relative in the main project folder
             conn.setAutoCommit(false);// Important as you want control of when data is written
             System.out.println("Opened database successfully");
         } catch (Exception e)
@@ -60,10 +59,10 @@ public class DatabaseConnect
                 String roomTypeRequired = rs.getString("RoomTypeRequired");
                 int[] classes = getClassesOfExam(examID);
                 LinkedList<Integer> tempStudents = new LinkedList<>();
-                for (int j = 0; j < classes.length; j++) {
-                    int[] classStudents = getStudentsOfClasses(classes[j]);
-                    for (int k = 0; k < classStudents.length; k++) {
-                        tempStudents.append(classStudents[k]);
+                for (int aClass : classes) {
+                    int[] classStudents = getStudentsOfClasses(aClass);
+                    for (int classStudent : classStudents) {
+                        tempStudents.append(classStudent);
                     }
                 }
                 int[] students = new int[tempStudents.len()];
@@ -98,7 +97,7 @@ public class DatabaseConnect
         try
         {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT ClassID FROM ClassEnrolment WHERE ClassID = " + classID + ";");
+            rs = stmt.executeQuery("SELECT StudentID FROM ClassEnrolment WHERE ClassID = " + classID + ";");
             while (rs.next())
             {
                 int studentID = rs.getInt("StudentID");
@@ -158,7 +157,7 @@ public class DatabaseConnect
         try
         {
             stmt1 = conn.createStatement();
-            rs1 = stmt1.executeQuery("SELECT COUNT(WeekNumber, PeriodNumber) as numSlots FROM TimeSlots WHERE UsableForExams = 1 ORDER BY WeekNumber ASC, PeriodNumber ASC;");
+            rs1 = stmt1.executeQuery("SELECT COUNT(WeekNumber) as numSlots FROM TimeSlots WHERE UsableForExams = 1 ORDER BY WeekNumber ASC, PeriodNumber ASC;");
             TRC = new ConflictNode[rs1.getInt("numSlots")][];
             stmt = conn.createStatement();
             rs = stmt.executeQuery("SELECT WeekNumber, PeriodNumber FROM TimeSlots WHERE UsableForExams = 1 ORDER BY WeekNumber ASC, PeriodNumber ASC;");
@@ -168,9 +167,9 @@ public class DatabaseConnect
                 int weekNumber = rs.getInt("WeekNumber");
                 int periodNumber = rs.getInt("PeriodNumber");
                 LinkedList<ConflictNode> roomsInTimeslot = new LinkedList<>();
-                for (int i = 0; i < rooms.length; i++) {
-                    boolean availability = getRoomAvailability(rooms[i], weekNumber, periodNumber);
-                    roomsInTimeslot.append(new ConflictNode(weekNumber, periodNumber, rooms[i], availability));
+                for (Room room : rooms) {
+                    boolean availability = getRoomAvailability(room, weekNumber, periodNumber);
+                    roomsInTimeslot.append(new ConflictNode(weekNumber, periodNumber, room, availability));
                 }
                 TRC[slotCounter] = new ConflictNode[roomsInTimeslot.len()];
                 for (int i = 0; i < roomsInTimeslot.len(); i++) {
@@ -213,7 +212,6 @@ public class DatabaseConnect
     }
 
     private Room[] getAllRooms() throws Exception {
-        boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
         Room[] rooms;
@@ -242,5 +240,38 @@ public class DatabaseConnect
             rooms[i] = tempRooms.getValue(i);
         }
         return rooms;
+    }
+
+    public void addTimetable(Exam[][] timetable) throws Exception {
+        for (Exam[] exams : timetable) {
+            if (exams == null)
+                continue;
+            for (Exam exam : exams) {
+                addExamToTimetable(exam);
+
+            }
+        }
+    }
+
+    private void addExamToTimetable(Exam exam) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        LinkedList<Exam> tempExams = new LinkedList<>();
+        try
+        {
+            stmt = conn.createStatement();
+            String sql = "INSERT INTO Timetable (ExamID, PeriodNumber, WeekNumber, RoomID) VALUES (" + exam.getExamID() + ", " + exam.getPeriodNum() + ", " + exam.getWeekNum() + ", " + exam.getRoom().getRoomID() +");";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        }
+        catch (SQLException e)
+        {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to add exam " + exam.getExamID() + " to timetable table");
     }
 }

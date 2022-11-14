@@ -69,11 +69,11 @@ public class Exam {
     }
 
     public int[] getStudents() {
-        return students;
+        return this.students;
     }
 
     public int enrolment() {
-        return students.length;
+        return this.students.length;
     }
 
 
