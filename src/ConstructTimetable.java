@@ -450,10 +450,10 @@ public class ConstructTimetable {
 
     private boolean moveNotInShortTB(LinkedList<MoveTenure> shortTB, Exam exam1) throws Exception {
         for (int i = 0; i < shortTB.len(); i++) {
-            if (shortTB.getValue(i).getMove().getExam().getExamID() == exam1.getExamID()
-                    && shortTB.getValue(i).getMove().getRoomFrom().getRoomID() == exam1.getRoom().getRoomID()
-                    && shortTB.getValue(i).getMove().getTimeslotFrom().getPeriodNum() == exam1.getPeriodNum()
-                    && shortTB.getValue(i).getMove().getTimeslotFrom().getWeekNum() == exam1.getWeekNum()) {
+            if (shortTB.getValue(i).getExam().getExamID() == exam1.getExamID()
+                    && shortTB.getValue(i).getRoomFrom().getRoomID() == exam1.getRoom().getRoomID()
+                    && shortTB.getValue(i).getTimeslotFrom().getPeriodNum() == exam1.getPeriodNum()
+                    && shortTB.getValue(i).getTimeslotFrom().getWeekNum() == exam1.getWeekNum()) {
                 return false;
             }
         }
