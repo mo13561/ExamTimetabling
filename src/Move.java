@@ -13,6 +13,14 @@ public class Move {
         this.timeslotTo = timeslotTo;
     }
 
+    public Move(Move move) {
+        this.exam = move.getExam();
+        this.timeslotFrom = move.getTimeslotFrom();
+        this.timeslotTo = move.getTimeslotTo();
+        this.roomFrom = move.getRoomFrom();
+        this.roomTo = move.getRoomTo();
+    }
+
     public Exam getExam() {
         return exam;
     }
