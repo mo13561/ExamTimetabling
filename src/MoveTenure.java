@@ -1,8 +1,7 @@
-public class MoveTenure {
-    private Move move;
+public class MoveTenure extends Move {
     private int tenure;
     public MoveTenure(Move move, int tenure) {
-        this.move = move;
+        super(move);
         this.tenure = tenure;
     }
 
@@ -16,13 +15,5 @@ public class MoveTenure {
 
     public boolean tenureZero() {
         return this.tenure <= 0;
-    }
-
-    public Move getMove() {
-        return move;
-    }
-
-    public void setMove(Move move) {
-        this.move = move;
     }
 }
