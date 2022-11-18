@@ -1,11 +1,4 @@
-public class Timeslot {
-    private final int periodNum;
-    private final int weekNum;
-
-    public Timeslot(int weekNum, int periodNum) {
-        this.weekNum = weekNum;
-        this.periodNum = periodNum;
-    }
+public record Timeslot(int weekNum, int periodNum) {
 
     public int getPeriodNum() {
         return periodNum;

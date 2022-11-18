@@ -5,10 +5,6 @@ public class MoveTenure extends Move {
         this.tenure = tenure;
     }
 
-    public int getTenure() {
-        return tenure;
-    }
-
     public void decrementTenure() {
         this.tenure--;
     }

@@ -3,7 +3,7 @@ public class ConstructTimetable {
     private final ConflictNode[][] TRC;
 
     public ConstructTimetable() throws Exception {
-        this.exams = getExams();
+        getExams();
         this.exams = sort(this.exams, 0, this.exams.length - 1);//sort by enrolment (merge sort)
         this.TRC = getTRC();
     }
@@ -491,11 +491,10 @@ public class ConstructTimetable {
         return tempTRC;
     }
 
-    private Exam[] getExams() throws Exception {
+    private void getExams() throws Exception {
         DatabaseConnect connect = new DatabaseConnect();
-        Exam[] tempExams = connect.getAllExams();
+        this.exams = connect.getAllExams();
         connect.close();
-        return tempExams;
     }
 
     private void merge(Exam[] arr, int l, int middle, int r) throws Exception {

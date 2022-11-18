@@ -1,6 +1,6 @@
 public class LinkedList<G> {
     class Node {
-        G value;
+        final G value;
         Node next;
         Node previous;
 
@@ -25,15 +25,6 @@ public class LinkedList<G> {
         public boolean hasNext() {
             return this.next != null;
         }
-
-        public Node getNext() {
-            return next;
-        }
-
-        public void setNext(Node next) {
-            this.next = next;
-        }
-
     }
 
     Node front;

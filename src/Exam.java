@@ -1,28 +1,13 @@
 public class Exam {
-    private int examID;
-    private String examSub;
-    private String requiredRoomType;
-    private int[] students;
-    private int[] classes;
+    private final int examID;
+    private final String examSub;
+    private final String requiredRoomType;
+    private final int[] students;
+    private final int[] classes;
     private Timeslot timeslot;
     private Room room;
     private boolean examSet;
-
-    public Exam() {
-        this.examSet = false;
-    }
-
-    public Exam(int examID) {
-        this.examID = examID;
-        this.examSet = false;
-    }
-
-    public Exam(int examID, String examSub, String requiredRoomType) {
-        this.examID = examID;
-        this.examSub = examSub;
-        this.requiredRoomType = requiredRoomType;
-        this.examSet = false;
-    }
+    private Invigilator invigilator;
 
     public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students) {
         this.examID = examID;
@@ -31,6 +16,7 @@ public class Exam {
         this.classes = classes;
         this.students = students;
         this.examSet = false;
+        this.invigilator = null;
     }
 
     public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students, int weekNum, int periodNum, Room room) {
@@ -42,10 +28,7 @@ public class Exam {
         this.room = room;
         this.examSet = false;
         this.timeslot = new Timeslot(weekNum, periodNum);
-    }
-
-    public void setTimeslot(int weekNum, int periodNum) {
-        this.timeslot = new Timeslot(weekNum, periodNum);
+        this.invigilator = null;
     }
 
     public void setTimeslot(Timeslot timeslot) {
@@ -85,24 +68,8 @@ public class Exam {
         return this.timeslot.getPeriodNum();
     }
 
-    public void setRequiredRoomType(String requiredRoomType) {
-        this.requiredRoomType = requiredRoomType;
-    }
-
-    public void setStudents(int[] students) {
-        this.students = students;
-    }
-
-    public void setExamSub(String examSub) {
-        this.examSub = examSub;
-    }
-
     public int[] getClasses() {
         return classes;
-    }
-
-    public void setClasses(int[] classes) {
-        this.classes = classes;
     }
 
     public boolean isExamSet() {
@@ -119,5 +86,13 @@ public class Exam {
 
     public void setRoom(Room room) {
         this.room = room;
+    }
+
+    public Invigilator getInvigilator() {
+        return invigilator;
+    }
+
+    public void setInvigilator(Invigilator invigilator) {
+        this.invigilator = invigilator;
     }
 }
