@@ -201,12 +201,14 @@ public class Menu {
         DatabaseConnect conn = new DatabaseConnect();
         try {
             while (conn.classInDatabase(classID)) {
+                System.out.println("This class is already present in the database");
                 System.out.println("Enter class ID -> ");
                 classID = sc.nextInt();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        sc.nextLine();
         System.out.println("Enter class subject type -> ");
         String type = sc.nextLine().trim();
         System.out.println("Enter class year group -> ");
