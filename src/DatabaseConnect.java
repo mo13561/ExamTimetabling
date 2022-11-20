@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,7 +69,7 @@ public class DatabaseConnect {
         return exams;
     }
 
-    private int[] getStudentsOfClasses(int classID) throws Exception {
+    public int[] getStudentsOfClasses(int classID) throws Exception {
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -279,5 +280,368 @@ public class DatabaseConnect {
             invigilators[i] = tempInvigilators.getValue(i);
         }
         return invigilators;
+    }
+
+    public boolean studentInDatabase(int studentID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        int studentInDatabase = -1;
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT COUNT(StudentID) as thing FROM Students WHERE StudentID = " + studentID + ";");
+            studentInDatabase = rs.getInt("thing");
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Check if student in database query failed");
+        return studentInDatabase == 1;
+    }
+
+    public void addStudent(int studentID, String studentName, int yearStartedY7) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            String sql = "INSERT INTO Students (StudentID, StudentName, yearStartedY7) VALUES ("
+                    + studentID + ", '" + studentName + "', " + yearStartedY7 + ");";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to add student " + studentID + " to database");
+        System.out.println("Added student " + studentName + ", ID: " + studentID);
+    }
+
+    public void removeStudent(int studentID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("DELETE FROM Students WHERE StudentID = " + studentID +";");
+            stmt.executeUpdate("DELETE FROM ClassEnrolment WHERE StudentID = " + studentID +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to remove student " + studentID + " from all tables");
+        System.out.println("Removed student, ID: " + studentID);
+    }
+
+    public Student getStudent(int studentID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        Student student = new Student(-1, "", -1);
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM Students WHERE StudentID = " + studentID + ";");
+            student = new Student(rs.getInt("StudentID"), rs.getString("Name"), yearStartedToYearGroup(rs.getInt("yearStartedY7")));
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        }
+        catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Get student query failed");
+        return student;
+    }
+
+    public int yearStartedToYearGroup(int yearStartedY7) {
+        LocalDate date = LocalDate.now();
+        if (date.getMonthValue() >= 9) {
+            return 7 + (date.getYear() - yearStartedY7);
+        }
+        return 7 + (date.getYear() - yearStartedY7 - 1);
+    }
+
+    public void editStudentName(int studentID, String studentName) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("UPDATE Students SET Name = '" + studentName + "' WHERE StudentID = " + studentID +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to edit student " + studentID + " in Students table");
+        System.out.println("Edited student, ID: " + studentID + " -- new name: " + studentName);
+    }
+
+    public void editStudentYearStartedY7(int studentID, int yearStartedY7) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("UPDATE Students SET yearStartedY7 = " + yearStartedY7 + " WHERE StudentID = " + studentID +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to edit student " + studentID + " in Students table");
+        System.out.println("Edited student, ID: " + studentID + " -- new year group: " + yearStartedToYearGroup(yearStartedY7));
+    }
+
+    public boolean invigilatorInDatabase(int invigilatorID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        int invigilatorInDatabase = -1;
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT COUNT(InvigilatorID) as thing FROM Invigilator WHERE InvigilatorID = " + invigilatorID + ";");
+            invigilatorInDatabase = rs.getInt("thing");
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Check if invigilator in database query failed");
+        return invigilatorInDatabase == 1;
+    }
+
+    public void addInvigilator(int invigilatorID, int examsLeft) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            String sql = "INSERT INTO Invigilator (InvigilatorID, ContractedExamsLeft) VALUES ("
+                    + invigilatorID + ", " + examsLeft + ");";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to add invigilator " + invigilatorID + " to database");
+        System.out.println("Added invigilator, ID: " + invigilatorID + ", contracted exams left: " + examsLeft);
+    }
+
+    public Invigilator getInvigilator(int invigilatorID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        Invigilator invigilator = new Invigilator(invigilatorID, -1);
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM Invigilator WHERE InvigilatorID = " + invigilatorID + ";");
+            invigilator = new Invigilator(invigilatorID, rs.getInt("ContractedExamsLeft"));
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Get invigilator, ID: " + invigilatorID + " query failed");
+        return invigilator;
+    }
+
+    public void editInvigilatorExamsLeft(int invigilatorID, int newExamsLeft) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("UPDATE Invigilator SET ContractedExamsLeft = " + newExamsLeft + " WHERE InvigilatorID = " + invigilatorID +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to edit invigilator, ID: " + invigilatorID + " in Invigilator table");
+        System.out.println("Edited invigilator, ID: " + invigilatorID + " -- new contracted exams left: " + newExamsLeft);
+    }
+
+    public void removeInvigilator(int invigilatorID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("DELETE FROM Invigilator WHERE InvigilatorID = " + invigilatorID +";");
+            stmt.executeUpdate("DELETE FROM Timetable WHERE InvigilatorID = " + invigilatorID +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to remove invigilator, ID: " + invigilatorID + " from all tables");
+        System.out.println("Removed invigilator, ID: " + invigilatorID);
+    }
+
+    public void enrolStudentInClass(int classID, int studentID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            String sql = "INSERT INTO ClassEnrolment (StudentID, ClassID) VALUES ("
+                    + studentID + ", " + classID + ");";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to enrol student, ID : " + studentID + " to class, ID: " + classID);
+        System.out.println("Enrolled student, ID : " + studentID + " to class, ID: " + classID);
+    }
+
+    public void removeClass(int classID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("DELETE FROM Classes WHERE ClassID = " + classID +";");
+            stmt.executeUpdate("DELETE FROM ClassEnrolment WHERE ClassID = " + classID +";");
+            stmt.executeUpdate("DELETE FROM ExamEnrolment WHERE ClassID = " + classID +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to remove class, ID: " + classID + " from all tables");
+        System.out.println("Removed class, ID: " + classID);
+    }
+
+    public boolean classInDatabase(int classID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        int classInDatabase = -1;
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT COUNT(ClassID) as thing FROM Classes WHERE ClassID = " + classID + ";");
+            classInDatabase = rs.getInt("thing");
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Check if class, ID: " + classID + " in database query failed");
+        return classInDatabase == 1;
+    }
+
+    public void addClass(int classID, String type, int yearGroup) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            String sql = "INSERT INTO Classes (ClassID, ClassType, YearGroup) VALUES ("
+                    + classID + ", '" + type + "', " + yearGroup + ");";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to add class " + classID + " to database");
+        System.out.println("Added class, ID: " + classID + ", subject type: " + type);
+    }
+
+    public SClass getSClass(int classID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        SClass sClass = new SClass(-1, "", -1);
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM Classes WHERE ClassID = " + classID + ";");
+            sClass = new SClass(rs.getInt("ClassID"), rs.getString("ClassType"), rs.getInt("YearGroup"));
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        }
+        catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Get class query failed");
+        return sClass;
+    }
+
+    public void editClassType(int classID, String classType) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("UPDATE Classes SET ClassType = " + classType + " WHERE ClassID = " + classID +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to edit class, ID: " + classID + " in Classes table");
+        System.out.println("Edited class, ID: " + classID + " -- new class subject type: " + classType);
+    }
+
+    public void editClassYearGroup(int classID, int yearGroup) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("UPDATE Classes SET YearGroup = " + yearGroup + " WHERE ClassID = " + classID +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to edit class, ID: " + classID + " in Classes table");
+        System.out.println("Edited class, ID: " + classID + " -- new class year group: " + yearGroup);
+    }
+
+    public void removeStudentFromClass(int studentID, int classID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("DELETE FROM ClassEnrolment WHERE StudentID = " + studentID +" AND ClassID = " + classID + ";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to remove student " + studentID + " from class, ID: " + classID);
+        System.out.println("Removed student, ID: " + studentID + " from class, ID: " + classID);
     }
 }

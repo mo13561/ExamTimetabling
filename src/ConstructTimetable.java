@@ -420,6 +420,7 @@ public class ConstructTimetable {
                 }
             }
         }
+        System.out.println((weight1 * totalConsec) + (weight2 * wastedSpace));
         return (weight1 * totalConsec) + (weight2 * wastedSpace);
     }
 
