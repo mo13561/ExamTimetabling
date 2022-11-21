@@ -9,7 +9,10 @@ public class Exam {
     private boolean examSet;
     private Invigilator invigilator;
 
-    public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students) {
+    public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students) throws Exception {
+        if (!requiredRoomType.equals("Computer") && !requiredRoomType.equals("Normal") && !requiredRoomType.equals("Sports")) {
+            throw new Exception("Invalid room type provided");
+        }
         this.examID = examID;
         this.examSub = examSub;
         this.requiredRoomType = requiredRoomType;
@@ -19,7 +22,10 @@ public class Exam {
         this.invigilator = null;
     }
 
-    public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students, int weekNum, int periodNum, Room room) {
+    public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students, int weekNum, int periodNum, Room room) throws Exception {
+        if (!requiredRoomType.equals("Computer") && !requiredRoomType.equals("Normal") && !requiredRoomType.equals("Sports")) {
+            throw new Exception("Invalid room type provided");
+        }
         this.examID = examID;
         this.examSub = examSub;
         this.requiredRoomType = requiredRoomType;
@@ -89,7 +95,7 @@ public class Exam {
     }
 
     public Invigilator getInvigilator() {
-        return invigilator;
+        return this.invigilator;
     }
 
     public void setInvigilator(Invigilator invigilator) {

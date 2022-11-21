@@ -644,4 +644,353 @@ public class DatabaseConnect {
             throw new Exception("Unable to remove student " + studentID + " from class, ID: " + classID);
         System.out.println("Removed student, ID: " + studentID + " from class, ID: " + classID);
     }
+
+    public boolean timeslotInDatabase(int week, int period) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        int timeslotInDatabase = -1;
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT COUNT(WeekNumber) as thing FROM TimeSlots " +
+                    "WHERE WeekNumber = " + week + " AND PeriodNumber = " + period + ";");
+            timeslotInDatabase = rs.getInt("thing");
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Check if timeslot, week number: " + week + " , period number: " + period + " in database query failed");
+        return timeslotInDatabase == 1;
+    }
+
+    public void setTimeSlot(int weekNumber, int periodNumber, boolean available) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        int usable  = available ? 1 : 0;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("UPDATE TimeSlots SET UsableForExams = " + usable + " WHERE WeekNumber = " + weekNumber +" AND PeriodNumber = " + periodNumber +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to edit timeslot, week number: " + weekNumber + " , period number: " + periodNumber);
+        System.out.println("Edited timeslot, week number: " + weekNumber + " , period number: " + periodNumber + " -- new usability: " + available);
+    }
+
+    public void addTimeslot(int weekNumber, int periodNumber, boolean available) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        int usable  = available ? 1 : 0;
+        try {
+            stmt = conn.createStatement();
+            String sql = "INSERT INTO TimeSlots (WeekNumber, PeriodNumber, UsableForExams) VALUES ("
+                    + weekNumber + ", " + periodNumber + ", " + usable + ");";
+            addTimeslotToRoomAvailability(weekNumber, periodNumber);
+            stmt.executeUpdate(sql);
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to add timeslot, week number: " + weekNumber + " , period number: " + periodNumber);
+        System.out.println("Added timeslot, week number: " + weekNumber + " , period number: " + periodNumber + " , usability: " + available);
+    }
+
+    private void addTimeslotToRoomAvailability(int weekNumber, int periodNumber) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        Room[] rooms = getAllRooms();
+        try {
+            stmt = conn.createStatement();
+            for (Room room : rooms) {
+                String sql = "INSERT INTO RoomAvailability (RoomID, WeekNumber, PeriodNumber, Availability)" +
+                        " VALUES (" + room.getRoomID() + ", " + weekNumber + ", " + periodNumber + ", 1);";
+                stmt.executeUpdate(sql);
+            }
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to add timeslot, week number: " + weekNumber + " , period number: " + periodNumber + " to room availability");
+    }
+
+    public Timeslot[] getAvailableTimeslots() throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        Timeslot[] slots;
+        LinkedList<Timeslot> tempSlots = new LinkedList<>();
+
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM TimeSlots WHERE UsableForExams = 1 " +
+                    "ORDER BY WeekNumber ASC, PeriodNumber ASC;");
+            while (rs.next()) {
+                int weekNumber = rs.getInt("WeekNumber");
+                int periodNumber = rs.getInt("PeriodNumber");
+                tempSlots.append(new Timeslot(weekNumber, periodNumber));
+            }
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Get available timeslots query failed");
+        slots = new Timeslot[tempSlots.len()];
+        for (int i = 0; i < tempSlots.len(); i++) {
+            slots[i] = tempSlots.getValue(i);
+        }
+        return slots;
+    }
+
+    public boolean roomInDatabase(int roomID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        int roomInDatabase = -1;
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT COUNT(RoomID) as thing FROM Room WHERE RoomID = " + roomID + ";");
+            roomInDatabase = rs.getInt("thing");
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Check if room, ID: " + roomID + " in database query failed");
+        return roomInDatabase == 1;
+    }
+
+    public void addRoom(int roomID, int capacity, String type) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            String sql = "INSERT INTO Room (RoomID, Capacity, Type) VALUES ("
+                    + roomID + ", " + capacity + ", '" + type + "');";
+            stmt.executeUpdate(sql);
+            Timeslot[] timeslots = getAllTimeslots();
+            for (Timeslot timeslot : timeslots) {
+                stmt.executeUpdate("INSERT INTO RoomAvailability (RoomID, WeekNumber, PeriodNumber, Availability)" +
+                        " VALUES (" + roomID + ", " + timeslot.getWeekNum() + ", " + timeslot.getPeriodNum() + ", 1);");
+            }
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to add room, ID: " + roomID + " , capacity: " + capacity + " , type: " + type);
+        System.out.println("Added room, ID: " + roomID + " , capacity: " + capacity + " , type: " + type);
+    }
+
+    private Timeslot[] getAllTimeslots() throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        Timeslot[] slots;
+        LinkedList<Timeslot> tempSlots = new LinkedList<>();
+
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM TimeSlots ORDER BY WeekNumber ASC, PeriodNumber ASC;");
+            while (rs.next()) {
+                int weekNumber = rs.getInt("WeekNumber");
+                int periodNumber = rs.getInt("PeriodNumber");
+                tempSlots.append(new Timeslot(weekNumber, periodNumber));
+            }
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Get all timeslots query failed");
+        slots = new Timeslot[tempSlots.len()];
+        for (int i = 0; i < tempSlots.len(); i++) {
+            slots[i] = tempSlots.getValue(i);
+        }
+        return slots;
+    }
+
+    public void removeRoom(int roomID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("DELETE FROM Room WHERE RoomID = " + roomID +";");
+            stmt.executeUpdate("DELETE FROM RoomAvailability WHERE RoomID = " + roomID +";");
+            stmt.executeUpdate("DELETE FROM Timetable WHERE RoomID = " + roomID +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to remove room, ID: " + roomID + " from all tables");
+        System.out.println("Removed room, ID: " + roomID);
+    }
+
+    public void setRoomAvailability(int roomID, int weekNumber, int periodNumber, boolean available) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        int availableNum = available ? 1 : 0;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("UPDATE RoomAvailability SET Availability = " + availableNum + " " +
+                    "WHERE WeekNumber = " + weekNumber +" AND PeriodNumber = " + periodNumber + " AND RoomID = " + roomID + ";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to set room availability, week number: " + weekNumber + " , period number: " + periodNumber + " , room ID: " + roomID);
+        System.out.println("Set room availability, week number: " + weekNumber + " , period number: " + periodNumber + " , room ID: " + roomID + " -- new availability: " + available);
+    }
+
+    public ConflictNode[] getRoomAvailability(int roomID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        LinkedList<ConflictNode> tempAvailability = new LinkedList<>();
+        ConflictNode[] availability;
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM RoomAvailability WHERE RoomID = " + roomID + ";");
+            while (rs.next()) {
+                tempAvailability.append(new ConflictNode(roomID, rs.getInt("WeekNumber"),
+                        rs.getInt("PeriodNumber"), rs.getInt("Availability") == 1));
+            }
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Get room availability query failed");
+        availability = new ConflictNode[tempAvailability.len()];
+        for (int i = 0; i < tempAvailability.len(); i++) {
+            availability[i] = tempAvailability.getValue(i);
+        }
+        return availability;
+    }
+
+    public void enrolClassInExam(int classID, int examID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            String sql = "INSERT INTO ExamEnrolment (ClassID, ExamID) VALUES (" + classID + ", " + examID + ");";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to enrol class, ID: " + classID + " into exam, ID: " + examID);
+        System.out.println("Enrolled class, ID: " + classID + " into exam, ID: " + examID);
+    }
+
+    public boolean classEnrolled(int classID, int examID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        int classEnrolled = -1;
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT COUNT(ClassID) as thing FROM ExamEnrolment " +
+                    "WHERE ClassID = " + classID + " AND ExamID = " + examID + ";");
+            classEnrolled = rs.getInt("thing");
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Check if class, ID: " + classID + " , enrolled in exam, ID: " + examID + " query failed");
+        return classEnrolled == 1;
+    }
+
+    public boolean examInDatabase(int examID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        int examInDatabase = -1;
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT COUNT(ExamID) as thing FROM Exams WHERE ExamID = " + examID + ";");
+            examInDatabase = rs.getInt("thing");
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Check if exam, ID: " + examID + " in database query failed");
+        return examInDatabase == 1;
+    }
+
+    public void addExam(int examID, String examSub, String roomType) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            String sql = "INSERT INTO Exams (ExamID, ExamSubject, RoomTypeRequired) " +
+                    "VALUES (" + examID + ", '" + examSub + "', '" + roomType + "');";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to add exam, ID: " + examID);
+        System.out.println("Added exam, ID: " + examID);
+    }
+
+    public void removeExam(int examID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("DELETE FROM Exams WHERE ExamID = " + examID +";");
+            stmt.executeUpdate("DELETE FROM ExamEnrolment WHERE ExamID = " + examID +";");
+            stmt.executeUpdate("DELETE FROM Timetable WHERE ExamID = " + examID +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to remove exam, ID: " + examID + " from all tables");
+        System.out.println("Removed exam, ID: " + examID);
+    }
 }

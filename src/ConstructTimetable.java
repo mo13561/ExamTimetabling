@@ -224,7 +224,7 @@ public class ConstructTimetable {
                 }
                 Exam[] tempExamCollection = new Exam[tempExamsFrom.len()];
                 for (int j = 0; j < tempExamCollection.length; j++) {
-                    tempExamCollection[j] = tempExamsFrom.getValue(i);
+                    tempExamCollection[j] = tempExamsFrom.getValue(j);
                 }
                 currentSol[timeFrom] = tempExamCollection;
                 Exam[] tempExamCollection2 = new Exam[currentSol[timeTo].length + 1];
@@ -274,7 +274,7 @@ public class ConstructTimetable {
         }
     }
 
-    private Exam[][] deepDuplicateCurrentSol(Exam[][] currentSol) {
+    private Exam[][] deepDuplicateCurrentSol(Exam[][] currentSol) throws Exception {
         Exam[][] duplicate = new Exam[currentSol.length][];
         for (int i = 0; i < currentSol.length; i++) {
             if (currentSol[i] == null)
@@ -382,7 +382,7 @@ public class ConstructTimetable {
         return new int[]{timeFrom, timeTo};
     }
 
-    private int getSwapCost(Exam[][] currentSol, Swap swap) {
+    private int getSwapCost(Exam[][] currentSol, Swap swap) throws Exception {
         Exam[][] tempSol = deepDuplicateCurrentSol(currentSol);
         int[] times = getTimesForSwap(swap);
         int timeFrom = times[0];
