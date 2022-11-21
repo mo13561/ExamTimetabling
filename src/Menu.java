@@ -91,7 +91,7 @@ public class Menu {
 
     }
 
-    private void constructTimetable() {
+    private void constructTimetable() throws Exception {
         int response;
         do {
             System.out.println("This will erase any previous timetables constructed, and update room availability. Are you OK with this?");
@@ -108,16 +108,12 @@ public class Menu {
             }
         } while (response != 1);
         DatabaseConnect conn = new DatabaseConnect();
-        conn.eraseTimetable(); //TODO
-        conn.close();
+        conn.eraseTimetable();
         Timetable timetable = new Timetable();
         timetable.makeTimetable();
         displayOverallTimetable();
-        updateRoomAvailability(); //TODO
-    }
-
-    private void updateRoomAvailability() {
-
+        conn.updateRoomAvailability(); //TODO yeah this doesnt work
+        conn.close();
     }
 
     private void examManagement() throws Exception {

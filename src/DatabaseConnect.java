@@ -1072,7 +1072,38 @@ public class DatabaseConnect {
         System.out.println("Edited exam, ID: " + examID + " -- new subject type: " + examSub);
     }
 
-    public void eraseTimetable() {
+    public void eraseTimetable() throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("DELETE FROM Timetable;");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to erase all timetable data");
+        System.out.println("Erased timetable");
+    }
 
+    public void updateRoomAvailability() throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("UPDATE RoomAvailability SET Availability = 0 FROM RoomAvailability, Timetable " +
+                    "WHERE RoomAvailability.WeekNumber = Timetable.WeekNumber AND RoomAvailability.PeriodNumber = Timetable.PeriodNumber;");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to update room availability");
+        System.out.println("Updated Room availability");
     }
 }
