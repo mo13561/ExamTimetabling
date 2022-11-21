@@ -56,9 +56,68 @@ public class Menu {
     }
 
     private void displayTimetable() {
+        int response;
+        do {
+            System.out.println("1 -> Display Overall Timetable");
+            System.out.println("2 -> Display Student Timetable");
+            System.out.println("3 -> Display Class Timetable");
+            System.out.println("4 -> Display Invigilator Timetable");
+            System.out.println("5 -> Return");
+            response = sc.nextInt();
+            switch (response) {
+                case 1 -> displayOverallTimetable(); //TODO
+                case 2 -> displayStudentTimetable(); //TODO
+                case 3 -> displayClassTimetable(); //TODO
+                case 4 -> displayInvigilatorTimetable(); //TODO
+                case 5 -> System.out.println("You have now quit the application");
+                default -> System.out.println("Invalid input, try again.");
+            }
+        } while (response != 5);
+    }
+
+    private void displayInvigilatorTimetable() {
+
+    }
+
+    private void displayClassTimetable() {
+
+    }
+
+    private void displayStudentTimetable() {
+
+    }
+
+    private void displayOverallTimetable() {
+
     }
 
     private void constructTimetable() {
+        int response;
+        do {
+            System.out.println("This will erase any previous timetables constructed, and update room availability. Are you OK with this?");
+            System.out.println("1 -> YES");
+            System.out.println("2 -> Return");
+            response = sc.nextInt();
+            switch (response) {
+                case 1 -> System.out.println("Constructing timetable with given information");
+                case 2 -> {
+                    System.out.println("Returning to previous section");
+                    return;
+                }
+                default -> System.out.println("Invalid input, try again.");
+            }
+        } while (response != 1);
+        DatabaseConnect conn = new DatabaseConnect();
+        conn.eraseTimetable(); //TODO
+        conn.close();
+        Timetable timetable = new Timetable();
+        timetable.makeTimetable();
+        displayOverallTimetable();
+        updateRoomAvailability(); //TODO
+    }
+
+    private void updateRoomAvailability() {
+
     }
 
     private void examManagement() throws Exception {
@@ -73,15 +132,20 @@ public class Menu {
             switch (response) {
                 case 1 -> addExam();
                 case 2 -> removeExam();
-                case 3 -> editExam(); //TODO
-                case 4 -> getAllExams(); //TODO
+                case 3 -> editExam();
+                case 4 -> getAllExams();
                 case 5 -> System.out.println("Returning to previous section");
                 default -> System.out.println("Invalid input, try again.");
             }
         } while (response != 5);
     }
 
-    private void getAllExams() {
+    private void getAllExams() throws Exception {
+        DatabaseConnect conn = new DatabaseConnect();
+        Exam[] exams = conn.getAllExams();
+        for (Exam exam : exams) {
+            System.out.println(exam);
+        }
     }
 
     private void editExam() throws Exception {
@@ -90,25 +154,23 @@ public class Menu {
             System.out.println("1 -> Get All Exams");
             System.out.println("2 -> Get Exam Enrolment");
             System.out.println("3 -> Exam Enrolment Management");
-            System.out.println("4 -> Return");
+            System.out.println("4 -> Alter Room Type Required");
+            System.out.println("5 -> Alter Exam Subject");
+            System.out.println("6 -> Return");
             response = sc.nextInt();
             switch (response) {
-                case 1 -> getAllExams(); //TODO
-                case 2 -> getExamEnrolment(); //TODO
-                case 3 -> examEnrolmentManagement(); //TODO
-                case 4 -> System.out.println("Returning to previous section");
+                case 1 -> getAllExams();
+                case 2 -> getExamEnrolment();
+                case 3 -> examEnrolmentManagement();
+                case 4 -> editExamRoomType();
+                case 5 -> editExamSubject();
+                case 6 -> System.out.println("Returning to previous section");
                 default -> System.out.println("Invalid input, try again.");
             }
-        } while (response != 4);
+        } while (response != 6);
     }
 
-    private void examEnrolmentManagement() {
-    }
-
-    private void getExamEnrolment() {
-    }
-
-    private void removeExam() throws Exception {
+    private int getExamIDInDatabase() throws Exception {
         System.out.println("Enter unique Exam ID [number] -> ");
         int examID = sc.nextInt();
         DatabaseConnect conn = new DatabaseConnect();
@@ -117,6 +179,100 @@ public class Menu {
             System.out.println("Enter unique Exam ID [number] -> ");
             examID = sc.nextInt();
         }
+        sc.nextLine();
+        return examID;
+    }
+
+    private void editExamSubject() throws Exception {
+        int examID = getExamIDInDatabase();
+        System.out.println("Enter new exam subject type required -> ");
+        String examSub = sc.nextLine();
+        DatabaseConnect conn = new DatabaseConnect();
+        conn.editExamSubjectType(examID, examSub);
+        conn.close();
+    }
+
+    private void editExamRoomType() throws Exception {
+        int examID = getExamIDInDatabase();
+        DatabaseConnect conn = new DatabaseConnect();
+        System.out.println("Enter new exam room type required -> ");
+        String roomType = sc.nextLine();
+        while (!roomType.equals("Computer") && !roomType.equals("Normal") && !roomType.equals("Sports")) {
+            System.out.println("Invalid room type provided");
+            System.out.println("Enter exam room type required -> ");
+            roomType = sc.nextLine();
+        }
+        conn.editExamRoomType(examID, roomType);
+        conn.close();
+    }
+
+    private void examEnrolmentManagement() throws Exception {
+        int response;
+        do {
+            System.out.println("1 -> Get All Classes");
+            System.out.println("2 -> Get Exam Enrolment");
+            System.out.println("3 -> Enrol Class in Exam");
+            System.out.println("4 -> Remove Class From Exam");
+            System.out.println("5 -> Return");
+            response = sc.nextInt();
+            switch (response) {
+                case 1 -> getAllExams();
+                case 2 -> getExamEnrolment();
+                case 3 -> enrolClass();
+                case 4 -> removeClassFromExam();
+                case 5 -> System.out.println("Returning to previous section");
+                default -> System.out.println("Invalid input, try again.");
+            }
+        } while (response != 5);
+    }
+
+    private void removeClassFromExam() throws Exception {
+        int examID = getExamIDInDatabase();
+        DatabaseConnect conn = new DatabaseConnect();
+        System.out.println("Enter unique Class ID -> ");
+        int classID = sc.nextInt();
+        while (!conn.classInDatabase(classID)) {
+            System.out.println("The class provided is not present in the database");
+            System.out.println("Enter class ID -> ");
+            classID = sc.nextInt();
+        }
+        sc.nextLine();
+        if (!conn.classEnrolled(classID, examID)) {
+            System.out.println("This class [ID: " + classID + "] is not enrolled in the exam [ID: " + examID + "]");
+            System.out.println("Returning to previous section");
+        } else {
+            conn.removeClassFromExam(classID, examID);
+        }
+        conn.close();
+    }
+
+    private void enrolClass() throws Exception {
+        int examID = getExamIDInDatabase();
+        DatabaseConnect conn = new DatabaseConnect();
+        conn.close();
+        sc.nextLine();
+        enrolClass(examID);
+    }
+
+    private void getExamEnrolment() throws Exception {
+        int examID = getExamIDInDatabase();
+        DatabaseConnect conn = new DatabaseConnect();
+        sc.nextLine();
+        int[] classes = conn.getExamEnrolment(examID);
+        conn.close();
+        StringBuilder output = new StringBuilder("[ ");
+        if (classes != null && classes.length != 0) {
+            output.append(classes[0]);
+            for (int i = 1; i < classes.length; i++) {
+                output.append(", ").append(classes[i]);
+            }
+        }
+        System.out.println(output + " ]");
+    }
+
+    private void removeExam() throws Exception {
+        int examID = getExamIDInDatabase();
+        DatabaseConnect conn = new DatabaseConnect();
         sc.nextLine();
         conn.removeExam(examID);
         conn.close();
@@ -160,14 +316,10 @@ public class Menu {
         System.out.println("Enter unique Class ID -> ");
         int classID = sc.nextInt();
         DatabaseConnect conn = new DatabaseConnect();
-        try {
-            while (!conn.classInDatabase(classID)) {
-                System.out.println("The class provided is not present in the database");
-                System.out.println("Enter class ID -> ");
-                classID = sc.nextInt();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        while (!conn.classInDatabase(classID)) {
+            System.out.println("The class provided is not present in the database");
+            System.out.println("Enter class ID -> ");
+            classID = sc.nextInt();
         }
         if (conn.classEnrolled(classID, examID)) {
             System.out.println("This class [ID: " + classID + "] is already enrolled in the exam [ID: " + examID + "]");

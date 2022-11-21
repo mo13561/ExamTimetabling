@@ -37,6 +37,18 @@ public class Exam {
         this.invigilator = null;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder output = new StringBuilder("[ ");
+        if (classes != null && classes.length != 0) {
+            output.append(classes[0]);
+            for (int i = 1; i < classes.length; i++) {
+                output.append(", ").append(classes[i]);
+            }
+        }
+        return output + " ]";
+    }
+
     public void setTimeslot(Timeslot timeslot) {
         this.timeslot = timeslot;
     }

@@ -993,4 +993,86 @@ public class DatabaseConnect {
             throw new Exception("Unable to remove exam, ID: " + examID + " from all tables");
         System.out.println("Removed exam, ID: " + examID);
     }
+
+    public int[] getExamEnrolment(int examID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        LinkedList<Integer> tempClasses = new LinkedList<>();
+        int[] classes;
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT (ClassID) FROM ExamEnrolment WHERE ExamID = " + examID + ";");
+            while (rs.next()) {
+                tempClasses.append(rs.getInt("ClassID"));
+            }
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Get exam enrolment for exam, ID: " + examID + " query failed");
+        classes = new int[tempClasses.len()];
+        for (int i = 0; i < tempClasses.len(); i++) {
+            classes[i] = tempClasses.getValue(i);
+        }
+        return classes;
+    }
+
+    public void removeClassFromExam(int classID, int examID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("DELETE FROM ExamEnrolment WHERE ExamID = " + examID +" AND ClassID = " + classID + ";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to remove class, ID: " + classID + " from exam, ID: " + examID);
+        System.out.println("Removed class, ID: " + classID + " from exam, ID: " + examID);
+    }
+
+    public void editExamRoomType(int examID, String roomType) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("UPDATE Exams SET RoomTypeRequired = '" + roomType + "' WHERE ExamID = " + examID +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to edit exam, ID: " + examID + " room type");
+        System.out.println("Edited exam, ID: " + examID + " -- new room type: " + roomType);
+    }
+
+    public void editExamSubjectType(int examID, String examSub) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        try {
+            stmt = conn.createStatement();
+            stmt.executeUpdate("UPDATE Exams SET ExamSubject = '" + examSub + "' WHERE ExamID = " + examID +";");
+            stmt.close();
+            conn.commit();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Unable to edit exam, ID: " + examID + " subject type");
+        System.out.println("Edited exam, ID: " + examID + " -- new subject type: " + examSub);
+    }
+
+    public void eraseTimetable() {
+
+    }
 }
