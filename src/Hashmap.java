@@ -214,14 +214,14 @@ public class Hashmap<K, T> {//generic hashmap modulus 11, dynamic.
     }
 
     public String toString() {
-        String display = "";
+        StringBuilder display = new StringBuilder();
         for (int i = 0; i < this.maxSize; i++) {
             if (map[i] == null) {
                 continue;
             }
-            display += "[ " + map[i].getUnconvertedKey() + " : " + map[i].getValue() + " ]";
+            display.append("[ ").append(map[i].getUnconvertedKey()).append(" : ").append(map[i].getValue()).append(" ]");
         }
-        return display;
+        return display.toString();
     }
 
     public boolean isFull() {
