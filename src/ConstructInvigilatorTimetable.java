@@ -55,7 +55,7 @@ public class ConstructInvigilatorTimetable { //takes in exams that are assigned 
                 }
             }
         }
-        return this.exams;
+            return this.exams;
     }
 
     private int getTimetableIndex(int resIndex) throws Exception {

@@ -1,8 +1,8 @@
 public class LinkedList<G> {
     class Node {
-        final G value;
-        Node next;
-        Node previous;
+        private final G value; //private might break something
+        private Node next;
+        private Node previous;
 
         public Node(G value) {
             this.value = value;

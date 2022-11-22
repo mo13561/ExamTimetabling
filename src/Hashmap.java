@@ -43,7 +43,7 @@ public class Hashmap<K, T> {//generic hashmap modulus 11, dynamic.
     private int maxSize = 11;
     private int modulus = 11;
     private int length = 0;
-    KeyValue<T>[] map;
+    private KeyValue<T>[] map;
 
     public Hashmap() {
         this.map = new KeyValue[this.maxSize];
@@ -99,7 +99,7 @@ public class Hashmap<K, T> {//generic hashmap modulus 11, dynamic.
         this.rearrange();
     }
 
-    public void rearrange() {
+    private void rearrange() {
         for (int i = 0; i < this.maxSize; i++) {
             if (map[i] == null) {
                 continue;
@@ -224,7 +224,7 @@ public class Hashmap<K, T> {//generic hashmap modulus 11, dynamic.
         return display.toString();
     }
 
-    public boolean isFull() {
+    private boolean isFull() {
         return this.length() == this.maxSize;
     }
 

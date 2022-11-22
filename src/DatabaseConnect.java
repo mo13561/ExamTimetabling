@@ -360,7 +360,7 @@ public class DatabaseConnect {
         return student;
     }
 
-    public int yearStartedToYearGroup(int yearStartedY7) {
+    private int yearStartedToYearGroup(int yearStartedY7) {
         LocalDate date = LocalDate.now();
         if (date.getMonthValue() >= 9) {
             return 7 + (date.getYear() - yearStartedY7);
@@ -1312,5 +1312,9 @@ public class DatabaseConnect {
             exams[i] = tempExams.getValue(i);
         }
         return exams;
+    }
+
+    public Exam[] getStudentTimetable(int studentID) {
+        return new Exam[0]; //TODO
     }
 }

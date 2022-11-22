@@ -4,7 +4,7 @@ import java.util.Scanner;
 public class Menu {
     final Scanner sc = new Scanner(System.in);
 
-    public void mainLoop() throws Exception {
+    private void mainLoop() throws Exception {
         int response;
         do {
             System.out.println("1 -> Student Management");
@@ -108,7 +108,19 @@ public class Menu {
     }
 
     private void displayStudentTimetable() throws Exception {
-        displayOverallTimetable();
+        DatabaseConnect conn = new DatabaseConnect();
+        System.out.println("Enter unique Student ID -> ");
+        int studentID = sc.nextInt();
+        while (!conn.studentInDatabase(studentID)) {
+            System.out.println("The student provided is not present in the database");
+            System.out.println("Enter student ID -> ");
+            studentID = sc.nextInt();
+        }
+        Exam[] timetable = conn.getStudentTimetable(studentID);
+        conn.close();
+        for (Exam exam : timetable) {
+            System.out.println(exam.getAllInformation());
+        }
     }
 
     private void displayOverallTimetable() throws Exception {

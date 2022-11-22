@@ -4,7 +4,7 @@ public class ConstructTimetable {
 
     public ConstructTimetable() throws Exception {
         getExams();
-        this.exams = sort(this.exams, 0, this.exams.length - 1);//sort by enrolment (merge sort)
+        sort(this.exams, 0, this.exams.length - 1);//sort by enrolment (merge sort)
         this.TRC = getTRC();
     }
 
@@ -534,13 +534,12 @@ public class ConstructTimetable {
         }
     }
 
-    public Exam[] sort(Exam[] arr, int start, int end) throws Exception {
+    private void sort(Exam[] arr, int start, int end) throws Exception {
         if (start < end) {
             int middle = start + (end - start) / 2;
             sort(arr, start, middle);
             sort(arr, middle + 1, end);
             merge(arr, start, middle, end);
         }
-        return arr;
     }
 }
