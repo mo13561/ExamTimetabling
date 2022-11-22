@@ -37,6 +37,21 @@ public class Exam {
         this.invigilator = null;
     }
 
+    public Exam(int examID, String examSub, String requiredRoomType, int[] classes, int[] students, int weekNum, int periodNum, Room room, Invigilator invigilator) throws Exception {
+        if (!requiredRoomType.equals("Computer") && !requiredRoomType.equals("Normal") && !requiredRoomType.equals("Sports")) {
+            throw new Exception("Invalid room type provided");
+        }
+        this.examID = examID;
+        this.examSub = examSub;
+        this.requiredRoomType = requiredRoomType;
+        this.classes = classes;
+        this.students = students;
+        this.room = room;
+        this.examSet = false;
+        this.timeslot = new Timeslot(weekNum, periodNum);
+        this.invigilator = invigilator;
+    }
+
     @Override
     public String toString() {
         StringBuilder output = new StringBuilder("[ ");
@@ -113,4 +128,20 @@ public class Exam {
     public void setInvigilator(Invigilator invigilator) {
         this.invigilator = invigilator;
     }
+
+    public String getAllInformation() {
+        String output;
+        output = "Exam ID = " + this.examID + ", Subject = " + this.examSub + ", Room Type = " + this.requiredRoomType +
+                ", Room ID = " + this.room.getRoomID() + ", Week Number =  " + this.getWeekNum() + ", Period Number = "  + this.getPeriodNum() +
+                ", Invigilator ID = " + this.invigilator.getInvID() + "\n";
+        output = output + ("Classes = " + this + "\n");
+        StringBuilder studentsOutput = new StringBuilder("Students = [");
+        if (students != null && students.length != 0) {
+            studentsOutput.append(students[0]);
+            for (int i = 1; i < students.length; i++) {
+                studentsOutput.append(", ").append(students[i]);
+            }
+        }
+        return output + studentsOutput + "]"
+;    }
 }

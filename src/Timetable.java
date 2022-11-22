@@ -1,7 +1,7 @@
 public class Timetable {
     private Exam[][] timetable;
 
-    public void makeTimetable() {
+    public boolean makeTimetable() {
         ConstructTimetable constructTimetable;
         this.timetable = new Exam[0][];
         try {
@@ -12,11 +12,17 @@ public class Timetable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        addInvigilators();
+        if (timetable == null) {
+            System.out.println("Unable to construct a timetable with given resources.");
+            return false;
+        }
+        if (!addInvigilators()) {
+            return false;
+        }
         System.out.println("added invigilators");
         addToDatabase();
         System.out.println("added to database");
-        System.out.println("done finally");
+        return true;
     }
 
     private void addToDatabase() {
@@ -29,12 +35,13 @@ public class Timetable {
         conn.close();
     }
 
-    public void addInvigilators() {
+    public boolean addInvigilators() {
         ConstructInvigilatorTimetable invTable = new ConstructInvigilatorTimetable(this.timetable);
         try {
             this.timetable = invTable.addInvigilators();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return this.timetable != null;
     }
 }

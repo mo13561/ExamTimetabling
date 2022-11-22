@@ -47,7 +47,7 @@ public class Menu {
             response = sc.nextInt();
             switch (response) {
                 case 1 -> examManagement();
-                case 2 -> constructTimetable(); //TODO
+                case 2 -> constructTimetable();
                 case 3 -> displayTimetable(); //TODO
                 case 4 -> System.out.println("Returning to previous section");
                 default -> System.out.println("Invalid input, try again.");
@@ -55,7 +55,7 @@ public class Menu {
         } while (response != 4);
     }
 
-    private void displayTimetable() {
+    private void displayTimetable() throws Exception {
         int response;
         do {
             System.out.println("1 -> Display Overall Timetable");
@@ -65,30 +65,59 @@ public class Menu {
             System.out.println("5 -> Return");
             response = sc.nextInt();
             switch (response) {
-                case 1 -> displayOverallTimetable(); //TODO
+                case 1 -> displayOverallTimetable();
                 case 2 -> displayStudentTimetable(); //TODO
-                case 3 -> displayClassTimetable(); //TODO
-                case 4 -> displayInvigilatorTimetable(); //TODO
+                case 3 -> displayClassTimetable();
+                case 4 -> displayInvigilatorTimetable();
                 case 5 -> System.out.println("You have now quit the application");
                 default -> System.out.println("Invalid input, try again.");
             }
         } while (response != 5);
     }
 
-    private void displayInvigilatorTimetable() {
-
+    private void displayInvigilatorTimetable() throws Exception {
+        DatabaseConnect conn = new DatabaseConnect();
+        System.out.println("Enter unique Invigilator ID -> ");
+        int invID = sc.nextInt();
+        while (!conn.invigilatorInDatabase(invID)) {
+            System.out.println("The invigilator provided is not present in the database");
+            System.out.println("Enter Invigilator ID -> ");
+            invID = sc.nextInt();
+        }
+        Exam[] timetable = conn.getInvigilatorTimetable(invID);
+        conn.close();
+        for (Exam exam : timetable) {
+            System.out.println(exam.getAllInformation());
+        }
     }
 
-    private void displayClassTimetable() {
-
+    private void displayClassTimetable() throws Exception {
+        DatabaseConnect conn = new DatabaseConnect();
+        System.out.println("Enter unique Class ID -> ");
+        int classID = sc.nextInt();
+        while (!conn.classInDatabase(classID)) {
+            System.out.println("The class provided is not present in the database");
+            System.out.println("Enter class ID -> ");
+            classID = sc.nextInt();
+        }
+        Exam[] timetable = conn.getClassTimetable(classID);
+        conn.close();
+        for (Exam exam : timetable) {
+            System.out.println(exam.getAllInformation());
+        }
     }
 
-    private void displayStudentTimetable() {
-
+    private void displayStudentTimetable() throws Exception {
+        displayOverallTimetable();
     }
 
-    private void displayOverallTimetable() {
-
+    private void displayOverallTimetable() throws Exception {
+        DatabaseConnect conn = new DatabaseConnect();
+        Exam[] timetable = conn.getOverallTimetable();
+        conn.close();
+        for (Exam exam : timetable) {
+            System.out.println(exam.getAllInformation());
+        }
     }
 
     private void constructTimetable() throws Exception {
@@ -110,9 +139,23 @@ public class Menu {
         DatabaseConnect conn = new DatabaseConnect();
         conn.eraseTimetable();
         Timetable timetable = new Timetable();
-        timetable.makeTimetable();
-        displayOverallTimetable();
-        conn.updateRoomAvailability(); //TODO yeah this doesnt work
+        if (timetable.makeTimetable()) {
+            displayOverallTimetable();
+            conn.updateRoomAvailability();
+            conn.close();
+            updateInvigilatorExamsLeft();
+        } else {
+            System.out.println("UNABLE TO MAKE TIMETABLE, PLEASE UPDATE RESOURCES IN MANAGEMENT SECTIONS.");
+            System.out.println("Returning to previous section");
+        }
+    }
+
+    private void updateInvigilatorExamsLeft() throws Exception {
+        DatabaseConnect conn = new DatabaseConnect();
+        Invigilator[] invigilators = conn.getAllInvigilators();
+        for (Invigilator invigilator : invigilators) {
+            conn.editInvigilatorExamsLeft(invigilator.getInvID(), invigilator.getExamsLeft() - conn.getExamsInvigilated(invigilator.getInvID()));
+        }
         conn.close();
     }
 
