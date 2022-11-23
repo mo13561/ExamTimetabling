@@ -150,9 +150,11 @@ public class Menu {
         } while (response != 1);
         DatabaseConnect conn = new DatabaseConnect();
         conn.eraseTimetable();
+        conn.close();
         Timetable timetable = new Timetable();
         if (timetable.makeTimetable()) {
             displayOverallTimetable();
+            conn = new DatabaseConnect();
             conn.updateRoomAvailability();
             conn.close();
             updateInvigilatorExamsLeft();
@@ -753,11 +755,15 @@ public class Menu {
         DatabaseConnect conn = new DatabaseConnect();
         SClass sClass = conn.getSClass(classID);
         if (conn.studentInDatabase(studentID)) {
-            Student student = conn.getStudent(studentID);
-            if (student.getYearGroup() == sClass.getYearGroup()) {
-                conn.enrolStudentInClass(classID, studentID);
+            if (conn.studentInClass(studentID, classID)) {
+                System.out.println("The provided student is already in the class");
             } else {
-                System.out.println("The provided student was not in the same year group as the class, try again");
+                Student student = conn.getStudent(studentID);
+                if (student.getYearGroup() == sClass.getYearGroup()) {
+                    conn.enrolStudentInClass(classID, studentID);
+                } else {
+                    System.out.println("The provided student was not in the same year group as the class, try again");
+                }
             }
         } else {
             System.out.println("The student provided has not been added to the database, try again");

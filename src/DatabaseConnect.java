@@ -897,11 +897,45 @@ public class DatabaseConnect {
         return availability;
     }
 
+    public boolean studentInClass(int studentID, int classID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        int count = 0;
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT COUNT(ClassID) as thecount FROM ClassEnrolment WHERE StudentID = " + studentID + " AND ClassID = " + classID + ";");
+            count = rs.getInt("thecount");
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        } catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Check if student enrolled in class query failed");
+        return count == 1;
+    }
+
     public void enrolClassInExam(int classID, int examID) throws Exception {
         boolean bSelect = false;
         Statement stmt;
+        Statement stmt2;
+        ResultSet rs;
+        ResultSet rs2;
         try {
             stmt = conn.createStatement();
+            stmt2 = conn.createStatement();
+            rs = stmt.executeQuery("SELECT StudentID FROM ClassEnrolment WHERE ClassID = " + classID + ";");
+            while (rs.next()) {
+                rs2 = stmt2.executeQuery("SELECT ClassID FROM ExamEnrolment WHERE ExamID = " + examID + ";");
+                while (rs2.next()) {
+                    if (studentInClass(rs.getInt("StudentID"), rs2.getInt("ClassID"))) {
+                        System.out.println("The chosen class has a student already enrolled in the exam, try another class");
+                        return;
+                    }
+                }
+            }
             String sql = "INSERT INTO ExamEnrolment (ClassID, ExamID) VALUES (" + classID + ", " + examID + ");";
             stmt.executeUpdate(sql);
             stmt.close();
@@ -1120,7 +1154,7 @@ public class DatabaseConnect {
         ConflictNode[] slots;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT RoomID, WeekNumber, PeriodNumber FROM Timetable;");
+            rs = stmt.executeQuery("SELECT PeriodNumber, WeekNumber, RoomID FROM Timetable;");
             while (rs.next()) {
                 tempSlots.append(new ConflictNode(rs.getInt("RoomID"), rs.getInt("WeekNumber"), rs.getInt("PeriodNumber"), true));
             }
@@ -1314,7 +1348,55 @@ public class DatabaseConnect {
         return exams;
     }
 
-    public Exam[] getStudentTimetable(int studentID) {
-        return new Exam[0]; //TODO
+    public Exam[] getStudentTimetable(int studentID) throws Exception {
+        boolean bSelect = false;
+        Statement stmt;
+        ResultSet rs;
+        LinkedList<Exam> tempExams = new LinkedList<>();
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT Exams.ExamID, Exams.ExamSubject, Exams.RoomTypeRequired, Timetable.WeekNumber, Timetable.PeriodNumber, Timetable.RoomID," +
+                    " Room.Capacity, Timetable.InvigilatorID, Invigilator.ContractedExamsLeft FROM Timetable, Exams, Invigilator, Room, ExamEnrolment, ClassEnrolment " +
+                    "WHERE Exams.ExamID = Timetable.ExamID AND Room.RoomID = Timetable.RoomID AND Invigilator.InvigilatorID = Timetable.InvigilatorID AND " +
+                    "ExamEnrolment.ExamID = Timetable.ExamID AND ExamEnrolment.ClassID = ClassEnrolment.ClassID AND ClassEnrolment.StudentID = " + studentID + "  ORDER BY Exams.ExamID ASC;");
+            while (rs.next()) {
+                int examID = rs.getInt("ExamID");
+                String examSubject = rs.getString("ExamSubject");
+                String roomTypeRequired = rs.getString("RoomTypeRequired");
+                int invigilatorID = rs.getInt("InvigilatorID");
+                int weekNum = rs.getInt("WeekNumber");
+                int periodNum = rs.getInt("PeriodNumber");
+                int roomID = rs.getInt("RoomID");
+                int capacity = rs.getInt("Capacity");
+                int examsLeft = rs.getInt("ContractedExamsLeft");
+                int[] classes = getClassesOfExam(examID);
+                LinkedList<Integer> tempStudents = new LinkedList<>();
+                for (int aClass : classes) {
+                    int[] classStudents = getStudentsOfClasses(aClass);
+                    for (int classStudent : classStudents) {
+                        tempStudents.append(classStudent);
+                    }
+                }
+                int[] students = new int[tempStudents.len()];
+                for (int i = 0; i < tempStudents.len(); i++) {
+                    students[i] = tempStudents.getValue(i);
+                }
+                tempExams.append(new Exam(examID, examSubject, roomTypeRequired, classes, students, weekNum, periodNum,
+                        new Room(roomID, capacity, roomTypeRequired), new Invigilator(invigilatorID, examsLeft)));
+            }
+            rs.close();
+            stmt.close();
+            bSelect = true;
+        }
+        catch (SQLException e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        if (!bSelect)
+            throw new Exception("Get student timetable for student, ID: " + studentID + " query failed");
+        Exam[] exams = new Exam[tempExams.len()];
+        for (int i = 0; i < tempExams.len(); i++) {
+            exams[i] = tempExams.getValue(i);
+        }
+        return exams;
     }
 }
