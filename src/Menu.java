@@ -9,7 +9,7 @@ public class Menu {
         do {
             System.out.println("1 -> Student Management");
             System.out.println("2 -> Invigilator Management");
-            System.out.println("3 -> Timetable Production"); //TODO
+            System.out.println("3 -> Timetable Production");
             System.out.println("4 -> Class Management");
             System.out.println("5 -> Timeslot Management");
             System.out.println("6 -> Room Management");
@@ -48,7 +48,7 @@ public class Menu {
             switch (response) {
                 case 1 -> examManagement();
                 case 2 -> constructTimetable();
-                case 3 -> displayTimetable(); //TODO
+                case 3 -> displayTimetable();
                 case 4 -> System.out.println("Returning to previous section");
                 default -> System.out.println("Invalid input, try again.");
             }
@@ -66,7 +66,7 @@ public class Menu {
             response = sc.nextInt();
             switch (response) {
                 case 1 -> displayOverallTimetable();
-                case 2 -> displayStudentTimetable(); //TODO
+                case 2 -> displayStudentTimetable();
                 case 3 -> displayClassTimetable();
                 case 4 -> displayInvigilatorTimetable();
                 case 5 -> System.out.println("You have now quit the application");
