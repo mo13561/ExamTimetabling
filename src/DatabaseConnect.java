@@ -904,8 +904,8 @@ public class DatabaseConnect {
         int count = 0;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT COUNT(ClassID) as thecount FROM ClassEnrolment WHERE StudentID = " + studentID + " AND ClassID = " + classID + ";");
-            count = rs.getInt("thecount");
+            rs = stmt.executeQuery("SELECT COUNT(ClassID) as studentInClass FROM ClassEnrolment WHERE StudentID = " + studentID + " AND ClassID = " + classID + ";");
+            count = rs.getInt("studentInClass");
             rs.close();
             stmt.close();
             bSelect = true;
