@@ -53,7 +53,7 @@ public class ConstructTimetable {
             while (workingSet.len() > 0 && roomsAvailable(TRC[i])) {
                 int roomCounter = 0;
                 boolean examSet = false;
-                Exam exam = workingSet.getValue(0); //largest enrolment???
+                Exam exam = workingSet.getValue(0); //largest enrolment
                 while (!examSet && roomCounter < TRC[i].length) {
                     ConflictNode timeRoom = TRC[i][roomCounter];
                     if (timeRoom.isAvailable() && examConstraintsSatisfied(exam, timeRoom)) {
@@ -393,14 +393,14 @@ public class ConstructTimetable {
 
     private int costFunction(Exam[][] solution) {
         System.out.println("cost");
-        int weight1 = 8;
+        int weight1 = 8; //biases for cost function. weight having consecutive exams as worse than wasted space
         int weight2 = 3;
-        int totalConsec = 0;
-        int wastedSpace = 0;
+        int totalConsec = 0; //number of instances where a student has an exam in back to back periods
+        int wastedSpace = 0; //how much space in a room is wasted (placing a small exam in large room increases this)
         for (int i = 0; i < solution.length - 1; i++) {
-            LinkedList<Integer> students = new LinkedList<>();
-            if (solution[i] != null && solution[i + 1] != null && solution[i].length > 0 && solution[i + 1].length > 0 && examsInConsecTimeslots(solution[i][0], solution[i+1][0])) {
-                for (int j = 0; j < solution[i].length; j++) {
+            LinkedList<Integer> students = new LinkedList<>(); //all students with consecutive exams
+            if (solution[i] != null && solution[i + 1] != null && solution[i].length > 0 && solution[i + 1].length > 0 && examsInConsecTimeslots(solution[i][0], solution[i+1][0])) { //if there are exams in timeslots i and i+1
+                for (int j = 0; j < solution[i].length; j++) { //totalConsec
                     for (int k = 0; k < solution[i][j].enrolment(); k++) {
                         students.append(solution[i][j].getStudents()[k]);
                     }
@@ -413,7 +413,7 @@ public class ConstructTimetable {
                 }
             }
         }
-        for (Exam[] timeslot : solution) {
+        for (Exam[] timeslot : solution) { //wastedSpace
             if (timeslot != null) {
                 for (Exam exam : timeslot) {
                     wastedSpace += exam.getRoom().getCapacity() - exam.enrolment();
@@ -421,7 +421,7 @@ public class ConstructTimetable {
             }
         }
         System.out.println((weight1 * totalConsec) + (weight2 * wastedSpace));
-        return (weight1 * totalConsec) + (weight2 * wastedSpace);
+        return (weight1 * totalConsec) + (weight2 * wastedSpace); //cost
     }
 
     private boolean examsInConsecTimeslots(Exam exam, Exam exam1) {
