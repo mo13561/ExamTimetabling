@@ -128,10 +128,10 @@ public class ConstructTimetable {
             if (!moves.isEmpty()) {
                 bestMove = moves.getValue(0);
                 bestMoveCost = getMoveCost(currentSol, bestMove);
-                for (int i = 1; i < swaps.len(); i++) {
+                for (int i = 1; i < moves.len(); i++) {
                     int currentMoveCost = getMoveCost(currentSol, moves.getValue(i));
                     if (currentMoveCost < bestMoveCost) {
-                        bestMove = swaps.getValue(i);
+                        bestMove = moves.getValue(i);
                         bestMoveCost = currentMoveCost;
                     }
                 }
@@ -151,7 +151,7 @@ public class ConstructTimetable {
                         break;
                     }
                 }
-                for (int j = 0; j < TRC[timeTo].length; j++) {
+                for (int j = 0; j < TRC[timeTo].length; j++) { //we need to keep track of room availability for current solution!
                     if (TRC[timeTo][j].getRoom().getRoomID() == bestMove.getRoomTo().getRoomID()) {
                         TRC[timeTo][j].setAvailable(false);
                         break;
@@ -182,7 +182,7 @@ public class ConstructTimetable {
     private void performSwap(Exam[][] currentSol, Swap bestSwap, int timeFrom, int timeTo) {
         for (int i = 0; i < currentSol[timeFrom].length; i++) {
             if (currentSol[timeFrom][i].getExamID() == bestSwap.getExam().getExamID()) {
-                for (int j = 0; j < currentSol[timeTo].length; j++) {
+                for (int j = 0; j < currentSol[timeTo].length; j++) {//swapping the exams that are happening between two room/timeslot combinations
                     if (currentSol[timeTo][j].getExamID() == bestSwap.getExam2().getExamID()) {
                         currentSol[timeFrom][i].setTimeslot(bestSwap.getTimeslotTo());
                         currentSol[timeTo][j].setTimeslot(bestSwap.getTimeslotFrom());
@@ -227,9 +227,13 @@ public class ConstructTimetable {
                     tempExamCollection[j] = tempExamsFrom.getValue(j);
                 }
                 currentSol[timeFrom] = tempExamCollection;
-                Exam[] tempExamCollection2 = new Exam[currentSol[timeTo].length + 1];
-                System.arraycopy(currentSol[timeTo],0,tempExamCollection2,0,currentSol[timeTo].length);
-                tempExamCollection2[tempExamCollection2.length - 1] = examFrom;
+                Exam[] tempExamCollection2 = new Exam[(currentSol[timeTo] == null) ? 1 : currentSol[timeTo].length + 1];
+                if (currentSol[timeTo] == null) {
+                    tempExamCollection2[0] = examFrom;
+                } else {
+                    System.arraycopy(currentSol[timeTo],0,tempExamCollection2,0,currentSol[timeTo].length);
+                    tempExamCollection2[tempExamCollection2.length - 1] = examFrom;
+                }
                 currentSol[timeTo] = tempExamCollection2;
             }
         }
