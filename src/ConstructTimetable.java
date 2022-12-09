@@ -102,6 +102,7 @@ public class ConstructTimetable {
         int nullIter = 7;
         while (costFunction(bestSol) > 0 && (iterNum - bestIter) < nullIter) {
             iterNum++;
+            System.out.println(iterNum);
             LinkedList<Swap> swaps = new LinkedList<>();
             LinkedList<Move> moves = new LinkedList<>();
             getSwaps(swaps, shortTB, longTB, currentSol, fBest);
@@ -195,6 +196,9 @@ public class ConstructTimetable {
                         currentSol[timeTo][j].setRoom(bestSwap.getRoomFrom());
                         currentSol[timeFrom][i] = currentSol[timeFrom][j];
                         currentSol[timeFrom][j] = bestSwap.getExam();
+                        Exam tempExam = currentSol[timeFrom][i]; //for swapping exam index assignments in solution
+                        currentSol[timeFrom][i] = currentSol[timeTo][j];
+                        currentSol[timeTo][j] = tempExam;
                     }
                 }
             }
