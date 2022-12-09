@@ -106,6 +106,11 @@ public class ConstructTimetable {
             LinkedList<Move> moves = new LinkedList<>();
             getSwaps(swaps, shortTB, longTB, currentSol, fBest);
             getMoves(moves, shortTB, longTB, currentSol, fBest);
+            for (int i = 0; i < moves.len(); i++) {
+                Move move = moves.getValue(i);
+                System.out.println(move.getExam().getExamID() + ", " + move.getTimeslotFrom().getWeekNum() + ", " + move.getTimeslotFrom().getPeriodNum()
+                        + ", " + move.getTimeslotTo().getWeekNum() + ", " + move.getTimeslotTo().getPeriodNum() + ", " + move.getRoomFrom().getRoomID() + ", " + move.getRoomTo().getRoomID());
+            }
             if (swaps.len() == 0 && moves.len() == 0) { //no more moves possible so stop local search
                 iterNum = Integer.MAX_VALUE;
                 continue;
