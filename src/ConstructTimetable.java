@@ -142,7 +142,7 @@ public class ConstructTimetable {
                     }
                 }
             }
-            if (bestMoveCost < bestSwapCost && bestMove != null) { //we do a move
+            if (bestMoveCost < bestSwapCost && bestMove != null || bestSwap == null && bestMove != null) { //we do a move
                 updateShortTBWithMove(shortTB, bestMove, tenureShort);
                 updateMVFWithExam(mvf, bestMove.getExam());
                 updateLongTBWithMove(longTB, mvf, bestMove.getExam());
