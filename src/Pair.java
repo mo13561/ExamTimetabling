@@ -1,4 +1,4 @@
-public class Pair<K,V> {
+public class Pair<K,V> { //a pair of two objects
     private K first;
     private V second;
 

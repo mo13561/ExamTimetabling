@@ -1,4 +1,4 @@
-public class MoveTenure extends Move {
+public class MoveTenure extends Move { //object for short tabu list.
     private int tenure;
     public MoveTenure(Move move, int tenure) {
         super(move);

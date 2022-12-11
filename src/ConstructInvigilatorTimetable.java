@@ -39,10 +39,10 @@ public class ConstructInvigilatorTimetable { //takes in exams that are assigned 
             System.out.println("The invigilators provided are unable to invigilate all the exams");
             return null;
         } else {
-            int[][] resGraph = maxflow.getResGraph();
+            int[][] resGraph = maxflow.getResGraph(); //residual graph after performing max flow
             for (int i = 1; i < this.timeslots.len() + 1; i++) {
                 for (int j = this.timeslots.len() + 1; j < this.timeslots.len() + this.invigilators.length + 1; j++) { //every invigilator
-                    int timeslotIndex = getTimetableIndex(i);
+                    int timeslotIndex = getTimetableIndex(i); //get time slot index from timetable
                     if (resGraph[i][j] == 0) { //if there was a flow between timeslot and invigilator, then assign invigilator to an exam in that timeslot
                         for (int k = 0; k < this.exams[timeslotIndex].length; k++) {
                             if (this.exams[timeslotIndex][k].getInvigilator() == null) { //first exam in timeslot that is not assigned an invigilator
@@ -55,7 +55,7 @@ public class ConstructInvigilatorTimetable { //takes in exams that are assigned 
                 }
             }
         }
-            return this.exams;
+            return this.exams; //return timetable
     }
 
     private int getTimetableIndex(int resIndex) throws Exception {
@@ -67,7 +67,7 @@ public class ConstructInvigilatorTimetable { //takes in exams that are assigned 
         return -1;
     }
 
-    private int[][] getInvigilatorGraph() throws Exception {
+    private int[][] getInvigilatorGraph() throws Exception { //get graph of source -> time slot layer -> invigilator layer -> sink
         int numNodes = this.timeslots.len() + this.invigilators.length + 2;
         int[][] graph = new int[numNodes][numNodes]; //first is source, 1 to no. timeslots is timeslots, no. timeslots + 1 to (no. timeslots + 1 + no. invigilators) are invigilators
         for (int i = 1; i < this.timeslots.len() + 1; i++) { //all timeslots.

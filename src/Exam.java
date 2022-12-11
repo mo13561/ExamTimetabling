@@ -129,7 +129,7 @@ public class Exam {
         this.invigilator = invigilator;
     }
 
-    public String getAllInformation() {
+    public String getAllInformation() { //all information for this exam
         String output;
         output = "Exam ID = " + this.examID + ", Subject = " + this.examSub + ", Room Type = " + this.requiredRoomType +
                 ", Room ID = " + this.room.getRoomID() + ", Week Number =  " + this.getWeekNum() + ", Period Number = "  + this.getPeriodNum() +

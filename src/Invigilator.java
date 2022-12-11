@@ -1,4 +1,4 @@
-public record Invigilator(int invID, int examsLeft) {
+public record Invigilator(int invID, int examsLeft) { //record for an invigilator
 
     public int getInvID() {
         return invID;

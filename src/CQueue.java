@@ -1,4 +1,4 @@
-public class CQueue<T> { //Circular queue made with generics
+public class CQueue<T> { //Generic circular queue
     private CQueue<T> front;
     private CQueue<T> rear;
     private T current;

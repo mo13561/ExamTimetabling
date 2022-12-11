@@ -1,6 +1,6 @@
-public class LinkedList<G> {
+public class LinkedList<G> { //generic linked list
     class Node {
-        private final G value; //private might break something
+        private final G value;
         private Node next;
         private Node previous;
 

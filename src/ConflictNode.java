@@ -1,4 +1,4 @@
-public class ConflictNode {
+public class ConflictNode { //node for storing room and time slot combination availability
     private final Timeslot timeslot;
     private final Room room;
     private boolean available;

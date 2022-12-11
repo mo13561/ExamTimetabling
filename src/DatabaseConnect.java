@@ -3,7 +3,7 @@ import java.time.LocalDate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DatabaseConnect {
+public class DatabaseConnect { //class for utility functions to access database
     private static Connection conn = null;
 
     public DatabaseConnect() {
@@ -11,14 +11,13 @@ public class DatabaseConnect {
             Class.forName("org.sqlite.JDBC");//Specify the SQLite Java driver
             conn = DriverManager.getConnection("jdbc:sqlite:TimetablingDB.db");//Specify the database, since relative in the main project folder
             conn.setAutoCommit(false);// Important as you want control of when data is written
-            System.out.println("Opened database successfully");
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
     }
 
-    public void close() {
+    public void close() { //closing connection
         try {
             conn.close();
         } catch (SQLException ex) {
@@ -26,7 +25,7 @@ public class DatabaseConnect {
         }
     }
 
-    public Exam[] getAllExams() throws Exception {
+    public Exam[] getAllExams() throws Exception { //all data for all exams
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -126,7 +125,7 @@ public class DatabaseConnect {
         return classes;
     }
 
-    public ConflictNode[][] getTRC() throws Exception {
+    public ConflictNode[][] getTRC() throws Exception { // timeslot room conflict matrix
         boolean bSelect = false;
         Statement stmt;
         Statement stmt1;
@@ -159,6 +158,8 @@ public class DatabaseConnect {
             }
             rs.close();
             stmt.close();
+            rs1.close();
+            stmt1.close();
             bSelect = true;
         } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -282,7 +283,7 @@ public class DatabaseConnect {
         return invigilators;
     }
 
-    public boolean studentInDatabase(int studentID) throws Exception {
+    public boolean studentInDatabase(int studentID) throws Exception { //is the student in the database?
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -360,7 +361,7 @@ public class DatabaseConnect {
         return student;
     }
 
-    private int yearStartedToYearGroup(int yearStartedY7) {
+    private int yearStartedToYearGroup(int yearStartedY7) { //year started year 7 to year group conversion
         LocalDate date = LocalDate.now();
         if (date.getMonthValue() >= 9) {
             return 7 + (date.getYear() - yearStartedY7);
@@ -402,7 +403,7 @@ public class DatabaseConnect {
         System.out.println("Edited student, ID: " + studentID + " -- new year group: " + yearStartedToYearGroup(yearStartedY7));
     }
 
-    public boolean invigilatorInDatabase(int invigilatorID) throws Exception {
+    public boolean invigilatorInDatabase(int invigilatorID) throws Exception { //is the invigilator in database?
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -534,7 +535,7 @@ public class DatabaseConnect {
         System.out.println("Removed class, ID: " + classID);
     }
 
-    public boolean classInDatabase(int classID) throws Exception {
+    public boolean classInDatabase(int classID) throws Exception { //is the class in the database?
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -706,7 +707,7 @@ public class DatabaseConnect {
     }
 
     private void addTimeslotToRoomAvailability(int weekNumber, int periodNumber) throws Exception {
-        boolean bSelect = false;
+        boolean bSelect = false; //after adding a timeslot, it needs to be added to room availability as well.
         Statement stmt;
         Room[] rooms = getAllRooms();
         try {
@@ -757,7 +758,7 @@ public class DatabaseConnect {
         return slots;
     }
 
-    public boolean roomInDatabase(int roomID) throws Exception {
+    public boolean roomInDatabase(int roomID) throws Exception { //is the room in the database?
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -897,7 +898,7 @@ public class DatabaseConnect {
         return availability;
     }
 
-    public boolean studentInClass(int studentID, int classID) throws Exception {
+    public boolean studentInClass(int studentID, int classID) throws Exception { // is the student in this class?
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -949,7 +950,7 @@ public class DatabaseConnect {
         System.out.println("Enrolled class, ID: " + classID + " into exam, ID: " + examID);
     }
 
-    public boolean classEnrolled(int classID, int examID) throws Exception {
+    public boolean classEnrolled(int classID, int examID) throws Exception { // is the class enrolled for this exam?
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -970,7 +971,7 @@ public class DatabaseConnect {
         return classEnrolled == 1;
     }
 
-    public boolean examInDatabase(int examID) throws Exception {
+    public boolean examInDatabase(int examID) throws Exception { // is the exam in the database?
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -1106,7 +1107,7 @@ public class DatabaseConnect {
         System.out.println("Edited exam, ID: " + examID + " -- new subject type: " + examSub);
     }
 
-    public void eraseTimetable() throws Exception {
+    public void eraseTimetable() throws Exception { //erase timetable, ready for construction of another.
         boolean bSelect = false;
         Statement stmt;
         try {
@@ -1146,7 +1147,7 @@ public class DatabaseConnect {
         System.out.println("Updated Room availability");
     }
 
-    private ConflictNode[] getExamRoomTimes() throws Exception {
+    private ConflictNode[] getExamRoomTimes() throws Exception { //Get exam rooms and timeslots query
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -1173,7 +1174,7 @@ public class DatabaseConnect {
         return slots;
     }
 
-    public int getExamsInvigilated(int invID) throws Exception {
+    public int getExamsInvigilated(int invID) throws Exception { //Get number of exams invigilated for invigilator
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;

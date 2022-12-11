@@ -1,4 +1,4 @@
-public record SClass(int classID, String classType, int yearGroup) {
+public record SClass(int classID, String classType, int yearGroup) { //record to hold informatoin about a class
 
     public int getClassID() {
         return classID;

@@ -8,7 +8,7 @@ public class ConstructTimetable {
         this.TRC = getTRC();
     }
 
-    public Exam[][] constructTimetable() throws Exception {
+    public Exam[][] constructTimetable() throws Exception { //stages 1 and 2 for constructing timetable
         Exam[][] solution;
         try {
             solution = getInitialSolution();
@@ -19,14 +19,14 @@ public class ConstructTimetable {
         return localSearch(solution);
     }
 
-    private Exam[] getConflictingExams(Exam exam) throws Exception {
+    private Exam[] getConflictingExams(Exam exam) throws Exception { //get all exams with a conflict to parameter
         LinkedList<Exam> tempConflictingExams = new LinkedList<>();
         for (Exam value : this.exams) {
             if (value.getExamID() == exam.getExamID())
                 continue;
             boolean conflictFlag = false;
             int[] students = value.getStudents();
-            for (int student : students) {
+            for (int student : students) { //if they share a student
                 for (int k = 0; k < exam.enrolment(); k++) {
                     if (exam.getStudents()[k] == student) {
                         tempConflictingExams.append(value);
@@ -38,16 +38,16 @@ public class ConstructTimetable {
                     break;
             }
         }
-        Exam[] conflictingExams = new Exam[tempConflictingExams.len()];
+        Exam[] conflictingExams = new Exam[tempConflictingExams.len()]; //return as an array of exams
         for (int i = 0; i < tempConflictingExams.len(); i++) {
             conflictingExams[i] = tempConflictingExams.getValue(i);
         }
         return conflictingExams;
     }
 
-    private Exam[][] getInitialSolution() throws Exception {
+    private Exam[][] getInitialSolution() throws Exception { //stage 1
         Exam[][] assignedExams = new Exam[TRC.length][];
-        for (int i = 0; i < TRC.length; i++){
+        for (int i = 0; i < TRC.length; i++){ // iterate through timeslots
             LinkedList<Exam> workingSet = getUnsetExams();
             LinkedList<Exam> currentTimeslotExams = new LinkedList<>();
             while (workingSet.len() > 0 && roomsAvailable(TRC[i])) {
@@ -56,7 +56,7 @@ public class ConstructTimetable {
                 Exam exam = workingSet.getValue(0); //largest enrolment
                 while (!examSet && roomCounter < TRC[i].length) {
                     ConflictNode timeRoom = TRC[i][roomCounter];
-                    if (timeRoom.isAvailable() && examConstraintsSatisfied(exam, timeRoom)) {
+                    if (timeRoom.isAvailable() && examConstraintsSatisfied(exam, timeRoom)) { //set exam
                         timeRoom.setAvailable(false);
                         exam.setTimeslot(timeRoom.getTimeslot());
                         exam.setRoom(timeRoom.getRoom());
@@ -66,7 +66,7 @@ public class ConstructTimetable {
                     }
                     roomCounter++;
                 }
-                if (examSet) {
+                if (examSet) { //remove conflicting exams from working set
                     Exam[] conflictingExams = getConflictingExams(exam);
                     for (Exam conflictingExam : conflictingExams) {
                         if (workingSet.contains(conflictingExam))
@@ -95,8 +95,8 @@ public class ConstructTimetable {
         double fBest = costFunction(currentSol);
         double fCurrent = fBest;
         LinkedList<MoveTenure> shortTB = new LinkedList<>(); //regard move as [exam, timeslot exam is from, room exam is from]
-        Exam[] longTB = new Exam[maxLong];
-        Hashmap<Integer, Integer> mvf = new Hashmap<>();
+        Exam[] longTB = new Exam[maxLong]; //long tabu list
+        Hashmap<Integer, Integer> mvf = new Hashmap<>(); // move frequency for each exam
         int iterNum = 0;
         int bestIter = 0;
         int nullIter = 7;
@@ -107,16 +107,11 @@ public class ConstructTimetable {
             LinkedList<Move> moves = new LinkedList<>();
             getSwaps(swaps, shortTB, longTB, currentSol, fBest);
             getMoves(moves, shortTB, longTB, currentSol, fBest);
-            for (int i = 0; i < moves.len(); i++) {
-                Move move = moves.getValue(i);
-                System.out.println(move.getExam().getExamID() + ", " + move.getTimeslotFrom().getWeekNum() + ", " + move.getTimeslotFrom().getPeriodNum()
-                        + ", " + move.getTimeslotTo().getWeekNum() + ", " + move.getTimeslotTo().getPeriodNum() + ", " + move.getRoomFrom().getRoomID() + ", " + move.getRoomTo().getRoomID());
-            }
             if (swaps.len() == 0 && moves.len() == 0) { //no more moves possible so stop local search
                 iterNum = Integer.MAX_VALUE;
                 continue;
             }
-            Swap bestSwap = null; //get best swap
+            Swap bestSwap = null; //get best swap (with the least cost function)
             int bestSwapCost = -1;
             if (!swaps.isEmpty()) {
                 bestSwap = swaps.getValue(0);
@@ -129,7 +124,7 @@ public class ConstructTimetable {
                     }
                 }
             }
-            Move bestMove = null; //get best move
+            Move bestMove = null; //get best move (with the least cost function)
             int bestMoveCost = -1;
             if (!moves.isEmpty()) {
                 bestMove = moves.getValue(0);
@@ -178,9 +173,8 @@ public class ConstructTimetable {
                 fBest = fCurrent;
                 bestIter = iterNum;
             } else if (fCurrent == fBest) {
-                bestSol = deepDuplicateCurrentSol(currentSol);
+                bestSol = deepDuplicateCurrentSol(currentSol); //need to deep duplicate otherwise we affect bestSol
             }
-            System.out.println("iteration");
         }
         return bestSol;
     }
@@ -205,7 +199,7 @@ public class ConstructTimetable {
         }
     }
 
-    private int[] getTimesForSwap(Swap bestSwap) {
+    private int[] getTimesForSwap(Swap bestSwap) { //get timeslot indexes of exams in swap
         int timeFrom = 0;
         int timeTo = 0;
         for (int i = 0; i < TRC.length; i++) {
@@ -225,7 +219,7 @@ public class ConstructTimetable {
                 Exam examFrom = currentSol[timeFrom][i];
                 examFrom.setTimeslot(bestMove.getTimeslotTo());
                 examFrom.setRoom(bestMove.getRoomTo());
-                LinkedList<Exam> tempExamsFrom = new LinkedList<>();
+                LinkedList<Exam> tempExamsFrom = new LinkedList<>(); //this section just rearranges the arrays in the solution
                 for (int j = 0; j < currentSol[timeFrom].length; j++) {
                     if (j != i) {
                         tempExamsFrom.append(currentSol[timeFrom][j]);
@@ -260,7 +254,7 @@ public class ConstructTimetable {
                 }
             }
         }
-        for (int i = 0; i < moves.len(); i++) {
+        for (int i = 0; i < moves.len(); i++) { //a move in shortTB is allowed only if it improves the best solution
             if (!moveNotInShortTB(shortTB, moves.getValue(i).getExam()) && getMoveCost(currentSol, moves.getValue(i)) > fBest) {
                 moves.remove(moves.getValue(i));
                 i--;
@@ -279,7 +273,7 @@ public class ConstructTimetable {
                 }
             }
         }
-        for (int i = 0; i < swaps.len(); i++) {
+        for (int i = 0; i < swaps.len(); i++) { //a swap in shortTB is allowed only if it improves the best solution
             if (!swapNotInShortTB(swaps.getValue(i), shortTB) && getSwapCost(currentSol, swaps.getValue(i)) > fBest) {
                 swaps.remove(swaps.getValue(i));
                 i--;
@@ -379,7 +373,7 @@ public class ConstructTimetable {
         return costFunction(tempSol);
     }
 
-    private int[] getTimesForMove(Move move) {
+    private int[] getTimesForMove(Move move) { //get timeslot indexes for a move
         int timeFrom = 0;
         int timeTo = 0;
         for (int i = 0; i < TRC.length; i++) {
@@ -438,7 +432,7 @@ public class ConstructTimetable {
     }
 
     private boolean examsInConsecTimeslots(Exam exam, Exam exam1) {
-        /* iff they are one period apart,
+        /* if and only if they are one period apart,
          * on the same week,
          * and on the same day (the earlier exam is not on the last period of a day)
          * */
@@ -511,7 +505,7 @@ public class ConstructTimetable {
         connect.close();
     }
 
-    private void merge(Exam[] arr, int l, int middle, int r) throws Exception {
+    private void merge(Exam[] arr, int l, int middle, int r) throws Exception { //merge sort
         int length1 = middle - l + 1;
         int length2 = r - middle;
 

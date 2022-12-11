@@ -1,14 +1,12 @@
 public class Timetable {
     private Exam[][] timetable;
 
-    public boolean makeTimetable() {
+    public boolean makeTimetable() { //returns boolean for if construction was successful
         ConstructTimetable constructTimetable;
         this.timetable = new Exam[0][];
         try {
             constructTimetable = new ConstructTimetable();
-            System.out.println("constructed");
-            timetable = constructTimetable.constructTimetable();
-            System.out.println("built timetable");
+            timetable = constructTimetable.constructTimetable(); //stages 1 and 2 for construction
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -16,16 +14,14 @@ public class Timetable {
             System.out.println("Unable to construct a timetable with given resources.");
             return false;
         }
-        if (!addInvigilators()) {
+        if (!addInvigilators()) { //adding invigilators to timetable (stage 3)
             return false;
         }
-        System.out.println("added invigilators");
-        addToDatabase();
-        System.out.println("added to database");
+        addToDatabase(); //adding timetable to database
         return true;
     }
 
-    private void addToDatabase() {
+    private void addToDatabase() { //adding the timetable to the database
         DatabaseConnect conn = new DatabaseConnect();
         try {
             conn.addTimetable(timetable);
@@ -35,7 +31,7 @@ public class Timetable {
         conn.close();
     }
 
-    public boolean addInvigilators() {
+    public boolean addInvigilators() { //adding invigilators to timetable after stages 1,2,3 are completed.
         ConstructInvigilatorTimetable invTable = new ConstructInvigilatorTimetable(this.timetable);
         try {
             this.timetable = invTable.addInvigilators();

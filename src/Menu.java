@@ -1,7 +1,7 @@
 import java.time.LocalDate;
 import java.util.Scanner;
 
-public class Menu {
+public class Menu { //menu class. should be self documenting
     final Scanner sc = new Scanner(System.in);
 
     private void mainLoop() throws Exception {

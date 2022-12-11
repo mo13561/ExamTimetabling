@@ -28,10 +28,10 @@ public class Maxflow {
                 path = Math.min(path, this.resGraph[parent[node]][node]);
             }
             for (int node = this.sink; node != this.source; node = parent[node]) {
-                this.resGraph[parent[node]][node] -= path;
+                this.resGraph[parent[node]][node] -= path; //update residual graph with new flow
                 this.resGraph[node][parent[node]] += path;
             }
-            this.flow += path;
+            this.flow += path; //add augmenting path to flow
         }
     }
 

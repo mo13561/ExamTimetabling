@@ -1,4 +1,4 @@
-public class Hashmap<K, T> {//generic hashmap modulus 11, dynamic.
+public class Hashmap<K, T> {//generic hashmap modulus current size of hashmap, dynamic.
     class KeyValue<V> {
         private final int key;
         private int position;
@@ -40,7 +40,7 @@ public class Hashmap<K, T> {//generic hashmap modulus 11, dynamic.
             return unconvertedKey;
         }
     }
-    private int maxSize = 11;
+    private int maxSize = 11; //starting modulus and length is 11
     private int modulus = 11;
     private int length = 0;
     private KeyValue<T>[] map;
