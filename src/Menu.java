@@ -196,8 +196,9 @@ public class Menu { //menu class. should be self documenting
     private void getAllExams() throws Exception {
         DatabaseConnect conn = new DatabaseConnect();
         Exam[] exams = conn.getAllExams();
+        conn.close();
         for (Exam exam : exams) {
-            System.out.println(exam);
+            System.out.println(exam.getUnsetInformation());
         }
     }
 
@@ -232,6 +233,7 @@ public class Menu { //menu class. should be self documenting
             System.out.println("Enter unique Exam ID [number] -> ");
             examID = sc.nextInt();
         }
+        conn.close();
         sc.nextLine();
         return examID;
     }
@@ -301,8 +303,6 @@ public class Menu { //menu class. should be self documenting
 
     private void enrolClass() throws Exception {
         int examID = getExamIDInDatabase();
-        DatabaseConnect conn = new DatabaseConnect();
-        conn.close();
         sc.nextLine();
         enrolClass(examID);
     }
@@ -374,6 +374,8 @@ public class Menu { //menu class. should be self documenting
             System.out.println("Enter class ID -> ");
             classID = sc.nextInt();
         }
+        conn.close();
+        conn = new DatabaseConnect();
         if (conn.classEnrolled(classID, examID)) {
             System.out.println("This class [ID: " + classID + "] is already enrolled in the exam [ID: " + examID + "]");
         } else {
@@ -435,6 +437,7 @@ public class Menu { //menu class. should be self documenting
         } catch (Exception e) {
             e.printStackTrace();
         }
+        conn.close();
         for (ConflictNode conflictNode : roomAvailability) {
             System.out.println("[ " +
                     "WeekNumber = " + conflictNode.getTimeslot().getWeekNum() + " ," +
@@ -453,7 +456,9 @@ public class Menu { //menu class. should be self documenting
             System.out.println("Enter unique Room ID [number] -> ");
             roomID = sc.nextInt();
         }
+        conn.close();
         int[] timeslot = getTimeSlotInput();
+        conn = new DatabaseConnect();
         conn.setRoomAvailability(roomID, timeslot[0], timeslot[1], available);
         conn.close();
     }
@@ -692,6 +697,7 @@ public class Menu { //menu class. should be self documenting
     }
 
     private void editClassType(int classID) throws Exception {
+        sc.nextLine();
         System.out.println("Enter new class type -> ");
         String classType = sc.nextLine().trim();
         DatabaseConnect conn = new DatabaseConnect();
@@ -980,6 +986,7 @@ public class Menu { //menu class. should be self documenting
     }
 
     private void editStudentYearGroup(int studentID) throws Exception {
+        sc.nextLine();
         System.out.println("Enter new Student Year Group -> ");
         int yearGroup = sc.nextInt();
         while (yearGroup != 7 && yearGroup != 8 && yearGroup != 9 && yearGroup != 10 && yearGroup != 11) {
@@ -993,6 +1000,7 @@ public class Menu { //menu class. should be self documenting
     }
 
     private void editStudentName(int studentID) throws Exception {
+        sc.nextLine();
         System.out.println("Enter new Student Name -> ");
         String newName = sc.nextLine().trim();
         DatabaseConnect conn = new DatabaseConnect();
@@ -1003,6 +1011,7 @@ public class Menu { //menu class. should be self documenting
     private void addStudent() throws Exception {
         System.out.println("Enter unique school Student ID [number]");
         int studentID = sc.nextInt();
+        sc.nextLine();
         System.out.println("Enter student's full name");
         String studentName = sc.nextLine().trim();
         System.out.println("Enter the current year group of the student");
@@ -1030,6 +1039,5 @@ public class Menu { //menu class. should be self documenting
             return date.getYear() - (yearGroup - 7);
         }
         return date.getYear() - (yearGroup - 6);
-
     }
 }

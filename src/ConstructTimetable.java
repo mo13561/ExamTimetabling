@@ -102,7 +102,6 @@ public class ConstructTimetable {
         int nullIter = 7;
         while (costFunction(bestSol) > 0 && (iterNum - bestIter) < nullIter) {
             iterNum++;
-            System.out.println(iterNum);
             LinkedList<Swap> swaps = new LinkedList<>();
             LinkedList<Move> moves = new LinkedList<>();
             getSwaps(swaps, shortTB, longTB, currentSol, fBest);
@@ -399,7 +398,6 @@ public class ConstructTimetable {
     }
 
     private int costFunction(Exam[][] solution) {
-        System.out.println("cost");
         int weight1 = 8; //biases for cost function. weight having consecutive exams as worse than wasted space
         int weight2 = 3;
         int totalConsec = 0; //number of instances where a student has an exam in back to back periods
@@ -427,7 +425,6 @@ public class ConstructTimetable {
                 }
             }
         }
-        System.out.println((weight1 * totalConsec) + (weight2 * wastedSpace));
         return (weight1 * totalConsec) + (weight2 * wastedSpace); //cost
     }
 

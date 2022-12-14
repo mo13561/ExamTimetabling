@@ -142,6 +142,20 @@ public class Exam {
                 studentsOutput.append(", ").append(students[i]);
             }
         }
-        return output + studentsOutput + "]"
-;    }
+        return output + studentsOutput + "]";
+    }
+
+    public String getUnsetInformation() {
+        String output;
+        output = "Exam ID = " + this.examID + ", Subject = " + this.examSub + ", Room Type = " + this.requiredRoomType + "\n";
+        output = output + ("Classes = " + this + "\n");
+        StringBuilder studentsOutput = new StringBuilder("Students = [");
+        if (students != null && students.length != 0) {
+            studentsOutput.append(students[0]);
+            for (int i = 1; i < students.length; i++) {
+                studentsOutput.append(", ").append(students[i]);
+            }
+        }
+        return output + studentsOutput + "]";
+    }
 }

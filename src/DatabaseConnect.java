@@ -251,7 +251,7 @@ public class DatabaseConnect { //class for utility functions to access database
         }
         if (!bSelect)
             throw new Exception("Unable to add exam " + exam.getExamID() + " to timetable table");
-        System.out.println("added exams");
+        System.out.println("Added exam, ID: " + exam.getExamID());
     }
 
     public Invigilator[] getAllInvigilators() throws Exception {
@@ -262,7 +262,6 @@ public class DatabaseConnect { //class for utility functions to access database
         try {
             stmt = conn.createStatement();
             rs = stmt.executeQuery("SELECT * FROM Invigilator;");
-
             while (rs.next()) {
                 int invigilatorID = rs.getInt("InvigilatorID");
                 int contractedExamsLeft = rs.getInt("ContractedExamsLeft");
@@ -308,7 +307,7 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            String sql = "INSERT INTO Students (StudentID, StudentName, yearStartedY7) VALUES ("
+            String sql = "INSERT INTO Students (StudentID, Name, yearStartedY7) VALUES ("
                     + studentID + ", '" + studentName + "', " + yearStartedY7 + ");";
             stmt.executeUpdate(sql);
             stmt.close();
@@ -600,7 +599,7 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("UPDATE Classes SET ClassType = " + classType + " WHERE ClassID = " + classID +";");
+            stmt.executeUpdate("UPDATE Classes SET ClassType = '" + classType + "' WHERE ClassID = " + classID +";");
             stmt.close();
             conn.commit();
             bSelect = true;
