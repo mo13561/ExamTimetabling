@@ -1,4 +1,4 @@
-public class Move { //all information for the move of an exam to an empty room/timeslot combination
+public class Move { // all information for the move of an exam to an empty room/timeslot combination
     protected final Exam exam;
     protected final Timeslot timeslotFrom;
     protected final Timeslot timeslotTo;

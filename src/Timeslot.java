@@ -1,4 +1,4 @@
-public record Timeslot(int weekNum, int periodNum) { //record to store a timeslot
+public record Timeslot(int weekNum, int periodNum) { // record to store a timeslot
 
     public int getPeriodNum() {
         return periodNum;

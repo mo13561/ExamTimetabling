@@ -3,13 +3,14 @@ import java.time.LocalDate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DatabaseConnect { //class for utility functions to access database
+public class DatabaseConnect { // class for utility functions to access database
     private static Connection conn = null;
 
     public DatabaseConnect() {
         try {
-            Class.forName("org.sqlite.JDBC");//Specify the SQLite Java driver
-            conn = DriverManager.getConnection("jdbc:sqlite:TimetablingDB.db");//Specify the database, since relative in the main project folder
+            Class.forName("org.sqlite.JDBC");// Specify the SQLite Java driver
+            conn = DriverManager.getConnection("jdbc:sqlite:TimetablingDB.db");// Specify the database, since relative
+                                                                               // in the main project folder
             conn.setAutoCommit(false);// Important as you want control of when data is written
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -17,7 +18,7 @@ public class DatabaseConnect { //class for utility functions to access database
         }
     }
 
-    public void close() { //closing connection
+    public void close() { // closing connection
         try {
             conn.close();
         } catch (SQLException ex) {
@@ -25,7 +26,7 @@ public class DatabaseConnect { //class for utility functions to access database
         }
     }
 
-    public Exam[] getAllExams() throws Exception { //all data for all exams
+    public Exam[] getAllExams() throws Exception { // all data for all exams
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -55,12 +56,11 @@ public class DatabaseConnect { //class for utility functions to access database
             rs.close();
             stmt.close();
             bSelect = true;
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
-                throw new Exception("Get all exams query failed");
+            throw new Exception("Get all exams query failed");
         Exam[] exams = new Exam[tempExams.len()];
         for (int i = 0; i < tempExams.len(); i++) {
             exams[i] = tempExams.getValue(i);
@@ -84,8 +84,7 @@ public class DatabaseConnect { //class for utility functions to access database
             rs.close();
             stmt.close();
             bSelect = true;
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
@@ -241,7 +240,7 @@ public class DatabaseConnect { //class for utility functions to access database
             stmt = conn.createStatement();
             String sql = "INSERT INTO Timetable (ExamID, PeriodNumber, WeekNumber, RoomID, InvigilatorID) VALUES ("
                     + exam.getExamID() + ", " + exam.getPeriodNum() + ", " + exam.getWeekNum() + ", "
-                    + exam.getRoom().getRoomID() + ", " + exam.getInvigilator().getInvID() +");";
+                    + exam.getRoom().getRoomID() + ", " + exam.getInvigilator().getInvID() + ");";
             stmt.executeUpdate(sql);
             stmt.close();
             conn.commit();
@@ -282,14 +281,15 @@ public class DatabaseConnect { //class for utility functions to access database
         return invigilators;
     }
 
-    public boolean studentInDatabase(int studentID) throws Exception { //is the student in the database?
+    public boolean studentInDatabase(int studentID) throws Exception { // is the student in the database?
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
         int studentInDatabase = -1;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT COUNT(StudentID) as thing FROM Students WHERE StudentID = " + studentID + ";");
+            rs = stmt.executeQuery(
+                    "SELECT COUNT(StudentID) as thing FROM Students WHERE StudentID = " + studentID + ";");
             studentInDatabase = rs.getInt("thing");
             rs.close();
             stmt.close();
@@ -326,8 +326,8 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("DELETE FROM Students WHERE StudentID = " + studentID +";");
-            stmt.executeUpdate("DELETE FROM ClassEnrolment WHERE StudentID = " + studentID +";");
+            stmt.executeUpdate("DELETE FROM Students WHERE StudentID = " + studentID + ";");
+            stmt.executeUpdate("DELETE FROM ClassEnrolment WHERE StudentID = " + studentID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -347,12 +347,12 @@ public class DatabaseConnect { //class for utility functions to access database
         try {
             stmt = conn.createStatement();
             rs = stmt.executeQuery("SELECT * FROM Students WHERE StudentID = " + studentID + ";");
-            student = new Student(rs.getInt("StudentID"), rs.getString("Name"), yearStartedToYearGroup(rs.getInt("yearStartedY7")));
+            student = new Student(rs.getInt("StudentID"), rs.getString("Name"),
+                    yearStartedToYearGroup(rs.getInt("yearStartedY7")));
             rs.close();
             stmt.close();
             bSelect = true;
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
@@ -360,7 +360,7 @@ public class DatabaseConnect { //class for utility functions to access database
         return student;
     }
 
-    private int yearStartedToYearGroup(int yearStartedY7) { //year started year 7 to year group conversion
+    private int yearStartedToYearGroup(int yearStartedY7) { // year started year 7 to year group conversion
         LocalDate date = LocalDate.now();
         if (date.getMonthValue() >= 9) {
             return 7 + (date.getYear() - yearStartedY7);
@@ -373,7 +373,7 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("UPDATE Students SET Name = '" + studentName + "' WHERE StudentID = " + studentID +";");
+            stmt.executeUpdate("UPDATE Students SET Name = '" + studentName + "' WHERE StudentID = " + studentID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -390,7 +390,8 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("UPDATE Students SET yearStartedY7 = " + yearStartedY7 + " WHERE StudentID = " + studentID +";");
+            stmt.executeUpdate(
+                    "UPDATE Students SET yearStartedY7 = " + yearStartedY7 + " WHERE StudentID = " + studentID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -399,17 +400,19 @@ public class DatabaseConnect { //class for utility functions to access database
         }
         if (!bSelect)
             throw new Exception("Unable to edit student " + studentID + " in Students table");
-        System.out.println("Edited student, ID: " + studentID + " -- new year group: " + yearStartedToYearGroup(yearStartedY7));
+        System.out.println(
+                "Edited student, ID: " + studentID + " -- new year group: " + yearStartedToYearGroup(yearStartedY7));
     }
 
-    public boolean invigilatorInDatabase(int invigilatorID) throws Exception { //is the invigilator in database?
+    public boolean invigilatorInDatabase(int invigilatorID) throws Exception { // is the invigilator in database?
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
         int invigilatorInDatabase = -1;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT COUNT(InvigilatorID) as thing FROM Invigilator WHERE InvigilatorID = " + invigilatorID + ";");
+            rs = stmt.executeQuery("SELECT COUNT(InvigilatorID) as thing FROM Invigilator WHERE InvigilatorID = "
+                    + invigilatorID + ";");
             invigilatorInDatabase = rs.getInt("thing");
             rs.close();
             stmt.close();
@@ -466,7 +469,8 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("UPDATE Invigilator SET ContractedExamsLeft = " + newExamsLeft + " WHERE InvigilatorID = " + invigilatorID +";");
+            stmt.executeUpdate("UPDATE Invigilator SET ContractedExamsLeft = " + newExamsLeft
+                    + " WHERE InvigilatorID = " + invigilatorID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -475,7 +479,8 @@ public class DatabaseConnect { //class for utility functions to access database
         }
         if (!bSelect)
             throw new Exception("Unable to edit invigilator, ID: " + invigilatorID + " in Invigilator table");
-        System.out.println("Edited invigilator, ID: " + invigilatorID + " -- new contracted exams left: " + newExamsLeft);
+        System.out
+                .println("Edited invigilator, ID: " + invigilatorID + " -- new contracted exams left: " + newExamsLeft);
     }
 
     public void removeInvigilator(int invigilatorID) throws Exception {
@@ -483,8 +488,8 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("DELETE FROM Invigilator WHERE InvigilatorID = " + invigilatorID +";");
-            stmt.executeUpdate("DELETE FROM Timetable WHERE InvigilatorID = " + invigilatorID +";");
+            stmt.executeUpdate("DELETE FROM Invigilator WHERE InvigilatorID = " + invigilatorID + ";");
+            stmt.executeUpdate("DELETE FROM Timetable WHERE InvigilatorID = " + invigilatorID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -520,9 +525,9 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("DELETE FROM Classes WHERE ClassID = " + classID +";");
-            stmt.executeUpdate("DELETE FROM ClassEnrolment WHERE ClassID = " + classID +";");
-            stmt.executeUpdate("DELETE FROM ExamEnrolment WHERE ClassID = " + classID +";");
+            stmt.executeUpdate("DELETE FROM Classes WHERE ClassID = " + classID + ";");
+            stmt.executeUpdate("DELETE FROM ClassEnrolment WHERE ClassID = " + classID + ";");
+            stmt.executeUpdate("DELETE FROM ExamEnrolment WHERE ClassID = " + classID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -534,7 +539,7 @@ public class DatabaseConnect { //class for utility functions to access database
         System.out.println("Removed class, ID: " + classID);
     }
 
-    public boolean classInDatabase(int classID) throws Exception { //is the class in the database?
+    public boolean classInDatabase(int classID) throws Exception { // is the class in the database?
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -585,8 +590,7 @@ public class DatabaseConnect { //class for utility functions to access database
             rs.close();
             stmt.close();
             bSelect = true;
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
@@ -599,7 +603,7 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("UPDATE Classes SET ClassType = '" + classType + "' WHERE ClassID = " + classID +";");
+            stmt.executeUpdate("UPDATE Classes SET ClassType = '" + classType + "' WHERE ClassID = " + classID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -616,7 +620,7 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("UPDATE Classes SET YearGroup = " + yearGroup + " WHERE ClassID = " + classID +";");
+            stmt.executeUpdate("UPDATE Classes SET YearGroup = " + yearGroup + " WHERE ClassID = " + classID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -633,7 +637,8 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("DELETE FROM ClassEnrolment WHERE StudentID = " + studentID +" AND ClassID = " + classID + ";");
+            stmt.executeUpdate(
+                    "DELETE FROM ClassEnrolment WHERE StudentID = " + studentID + " AND ClassID = " + classID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -662,17 +667,19 @@ public class DatabaseConnect { //class for utility functions to access database
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
-            throw new Exception("Check if timeslot, week number: " + week + " , period number: " + period + " in database query failed");
+            throw new Exception("Check if timeslot, week number: " + week + " , period number: " + period
+                    + " in database query failed");
         return timeslotInDatabase == 1;
     }
 
     public void setTimeSlot(int weekNumber, int periodNumber, boolean available) throws Exception {
         boolean bSelect = false;
         Statement stmt;
-        int usable  = available ? 1 : 0;
+        int usable = available ? 1 : 0;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("UPDATE TimeSlots SET UsableForExams = " + usable + " WHERE WeekNumber = " + weekNumber +" AND PeriodNumber = " + periodNumber +";");
+            stmt.executeUpdate("UPDATE TimeSlots SET UsableForExams = " + usable + " WHERE WeekNumber = " + weekNumber
+                    + " AND PeriodNumber = " + periodNumber + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -680,14 +687,16 @@ public class DatabaseConnect { //class for utility functions to access database
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
-            throw new Exception("Unable to edit timeslot, week number: " + weekNumber + " , period number: " + periodNumber);
-        System.out.println("Edited timeslot, week number: " + weekNumber + " , period number: " + periodNumber + " -- new usability: " + available);
+            throw new Exception(
+                    "Unable to edit timeslot, week number: " + weekNumber + " , period number: " + periodNumber);
+        System.out.println("Edited timeslot, week number: " + weekNumber + " , period number: " + periodNumber
+                + " -- new usability: " + available);
     }
 
     public void addTimeslot(int weekNumber, int periodNumber, boolean available) throws Exception {
         boolean bSelect = false;
         Statement stmt;
-        int usable  = available ? 1 : 0;
+        int usable = available ? 1 : 0;
         try {
             stmt = conn.createStatement();
             String sql = "INSERT INTO TimeSlots (WeekNumber, PeriodNumber, UsableForExams) VALUES ("
@@ -701,12 +710,14 @@ public class DatabaseConnect { //class for utility functions to access database
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
-            throw new Exception("Unable to add timeslot, week number: " + weekNumber + " , period number: " + periodNumber);
-        System.out.println("Added timeslot, week number: " + weekNumber + " , period number: " + periodNumber + " , usability: " + available);
+            throw new Exception(
+                    "Unable to add timeslot, week number: " + weekNumber + " , period number: " + periodNumber);
+        System.out.println("Added timeslot, week number: " + weekNumber + " , period number: " + periodNumber
+                + " , usability: " + available);
     }
 
     private void addTimeslotToRoomAvailability(int weekNumber, int periodNumber) throws Exception {
-        boolean bSelect = false; //after adding a timeslot, it needs to be added to room availability as well.
+        boolean bSelect = false; // after adding a timeslot, it needs to be added to room availability as well.
         Statement stmt;
         Room[] rooms = getAllRooms();
         try {
@@ -723,7 +734,8 @@ public class DatabaseConnect { //class for utility functions to access database
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
-            throw new Exception("Unable to add timeslot, week number: " + weekNumber + " , period number: " + periodNumber + " to room availability");
+            throw new Exception("Unable to add timeslot, week number: " + weekNumber + " , period number: "
+                    + periodNumber + " to room availability");
     }
 
     public Timeslot[] getAvailableTimeslots() throws Exception {
@@ -757,7 +769,7 @@ public class DatabaseConnect { //class for utility functions to access database
         return slots;
     }
 
-    public boolean roomInDatabase(int roomID) throws Exception { //is the room in the database?
+    public boolean roomInDatabase(int roomID) throws Exception { // is the room in the database?
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -836,9 +848,9 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("DELETE FROM Room WHERE RoomID = " + roomID +";");
-            stmt.executeUpdate("DELETE FROM RoomAvailability WHERE RoomID = " + roomID +";");
-            stmt.executeUpdate("DELETE FROM Timetable WHERE RoomID = " + roomID +";");
+            stmt.executeUpdate("DELETE FROM Room WHERE RoomID = " + roomID + ";");
+            stmt.executeUpdate("DELETE FROM RoomAvailability WHERE RoomID = " + roomID + ";");
+            stmt.executeUpdate("DELETE FROM Timetable WHERE RoomID = " + roomID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -857,7 +869,8 @@ public class DatabaseConnect { //class for utility functions to access database
         try {
             stmt = conn.createStatement();
             stmt.executeUpdate("UPDATE RoomAvailability SET Availability = " + availableNum + " " +
-                    "WHERE WeekNumber = " + weekNumber +" AND PeriodNumber = " + periodNumber + " AND RoomID = " + roomID + ";");
+                    "WHERE WeekNumber = " + weekNumber + " AND PeriodNumber = " + periodNumber + " AND RoomID = "
+                    + roomID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -865,8 +878,10 @@ public class DatabaseConnect { //class for utility functions to access database
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
-            throw new Exception("Unable to set room availability, week number: " + weekNumber + " , period number: " + periodNumber + " , room ID: " + roomID);
-        System.out.println("Set room availability, week number: " + weekNumber + " , period number: " + periodNumber + " , room ID: " + roomID + " -- new availability: " + available);
+            throw new Exception("Unable to set room availability, week number: " + weekNumber + " , period number: "
+                    + periodNumber + " , room ID: " + roomID);
+        System.out.println("Set room availability, week number: " + weekNumber + " , period number: " + periodNumber
+                + " , room ID: " + roomID + " -- new availability: " + available);
     }
 
     public ConflictNode[] getRoomAvailability(int roomID) throws Exception {
@@ -904,7 +919,8 @@ public class DatabaseConnect { //class for utility functions to access database
         int count = 0;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT COUNT(ClassID) as studentInClass FROM ClassEnrolment WHERE StudentID = " + studentID + " AND ClassID = " + classID + ";");
+            rs = stmt.executeQuery("SELECT COUNT(ClassID) as studentInClass FROM ClassEnrolment WHERE StudentID = "
+                    + studentID + " AND ClassID = " + classID + ";");
             count = rs.getInt("studentInClass");
             rs.close();
             stmt.close();
@@ -931,7 +947,8 @@ public class DatabaseConnect { //class for utility functions to access database
                 rs2 = stmt2.executeQuery("SELECT ClassID FROM ExamEnrolment WHERE ExamID = " + examID + ";");
                 while (rs2.next()) {
                     if (studentInClass(rs.getInt("StudentID"), rs2.getInt("ClassID"))) {
-                        System.out.println("The chosen class has a student already enrolled in the exam, try another class");
+                        System.out.println(
+                                "The chosen class has a student already enrolled in the exam, try another class");
                         return;
                     }
                 }
@@ -966,7 +983,8 @@ public class DatabaseConnect { //class for utility functions to access database
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
-            throw new Exception("Check if class, ID: " + classID + " , enrolled in exam, ID: " + examID + " query failed");
+            throw new Exception(
+                    "Check if class, ID: " + classID + " , enrolled in exam, ID: " + examID + " query failed");
         return classEnrolled == 1;
     }
 
@@ -1014,9 +1032,9 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("DELETE FROM Exams WHERE ExamID = " + examID +";");
-            stmt.executeUpdate("DELETE FROM ExamEnrolment WHERE ExamID = " + examID +";");
-            stmt.executeUpdate("DELETE FROM Timetable WHERE ExamID = " + examID +";");
+            stmt.executeUpdate("DELETE FROM Exams WHERE ExamID = " + examID + ";");
+            stmt.executeUpdate("DELETE FROM ExamEnrolment WHERE ExamID = " + examID + ";");
+            stmt.executeUpdate("DELETE FROM Timetable WHERE ExamID = " + examID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -1060,7 +1078,8 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("DELETE FROM ExamEnrolment WHERE ExamID = " + examID +" AND ClassID = " + classID + ";");
+            stmt.executeUpdate(
+                    "DELETE FROM ExamEnrolment WHERE ExamID = " + examID + " AND ClassID = " + classID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -1077,7 +1096,7 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("UPDATE Exams SET RoomTypeRequired = '" + roomType + "' WHERE ExamID = " + examID +";");
+            stmt.executeUpdate("UPDATE Exams SET RoomTypeRequired = '" + roomType + "' WHERE ExamID = " + examID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -1094,7 +1113,7 @@ public class DatabaseConnect { //class for utility functions to access database
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("UPDATE Exams SET ExamSubject = '" + examSub + "' WHERE ExamID = " + examID +";");
+            stmt.executeUpdate("UPDATE Exams SET ExamSubject = '" + examSub + "' WHERE ExamID = " + examID + ";");
             stmt.close();
             conn.commit();
             bSelect = true;
@@ -1106,7 +1125,7 @@ public class DatabaseConnect { //class for utility functions to access database
         System.out.println("Edited exam, ID: " + examID + " -- new subject type: " + examSub);
     }
 
-    public void eraseTimetable() throws Exception { //erase timetable, ready for construction of another.
+    public void eraseTimetable() throws Exception { // erase timetable, ready for construction of another.
         boolean bSelect = false;
         Statement stmt;
         try {
@@ -1146,7 +1165,7 @@ public class DatabaseConnect { //class for utility functions to access database
         System.out.println("Updated Room availability");
     }
 
-    private ConflictNode[] getExamRoomTimes() throws Exception { //Get exam rooms and timeslots query
+    private ConflictNode[] getExamRoomTimes() throws Exception { // Get exam rooms and timeslots query
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
@@ -1156,7 +1175,8 @@ public class DatabaseConnect { //class for utility functions to access database
             stmt = conn.createStatement();
             rs = stmt.executeQuery("SELECT PeriodNumber, WeekNumber, RoomID FROM Timetable;");
             while (rs.next()) {
-                tempSlots.append(new ConflictNode(rs.getInt("RoomID"), rs.getInt("WeekNumber"), rs.getInt("PeriodNumber"), true));
+                tempSlots.append(new ConflictNode(rs.getInt("RoomID"), rs.getInt("WeekNumber"),
+                        rs.getInt("PeriodNumber"), true));
             }
             rs.close();
             stmt.close();
@@ -1173,14 +1193,16 @@ public class DatabaseConnect { //class for utility functions to access database
         return slots;
     }
 
-    public int getExamsInvigilated(int invID) throws Exception { //Get number of exams invigilated for invigilator
+    public int getExamsInvigilated(int invID) throws Exception { // Get number of exams invigilated for invigilator
         boolean bSelect = false;
         Statement stmt;
         ResultSet rs;
         int numInvigilated = 0;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT COUNT(InvigilatorID) as numberInvigilated FROM Timetable WHERE InvigilatorID = " + invID + ";");
+            rs = stmt.executeQuery(
+                    "SELECT COUNT(InvigilatorID) as numberInvigilated FROM Timetable WHERE InvigilatorID = " + invID
+                            + ";");
             numInvigilated = rs.getInt("numberInvigilated");
             rs.close();
             stmt.close();
@@ -1200,9 +1222,12 @@ public class DatabaseConnect { //class for utility functions to access database
         LinkedList<Exam> tempExams = new LinkedList<>();
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT Exams.ExamID, Exams.ExamSubject, Exams.RoomTypeRequired, Timetable.WeekNumber, Timetable.PeriodNumber, Timetable.RoomID," +
-                    " Room.Capacity, Timetable.InvigilatorID, Invigilator.ContractedExamsLeft FROM Timetable, Exams, Invigilator, Room " +
-                    "WHERE Exams.ExamID = Timetable.ExamID AND Room.RoomID = Timetable.RoomID AND Invigilator.InvigilatorID = Timetable.InvigilatorID ORDER BY Exams.ExamID ASC;");
+            rs = stmt.executeQuery(
+                    "SELECT Exams.ExamID, Exams.ExamSubject, Exams.RoomTypeRequired, Timetable.WeekNumber, Timetable.PeriodNumber, Timetable.RoomID,"
+                            +
+                            " Room.Capacity, Timetable.InvigilatorID, Invigilator.ContractedExamsLeft FROM Timetable, Exams, Invigilator, Room "
+                            +
+                            "WHERE Exams.ExamID = Timetable.ExamID AND Room.RoomID = Timetable.RoomID AND Invigilator.InvigilatorID = Timetable.InvigilatorID ORDER BY Exams.ExamID ASC;");
             while (rs.next()) {
                 int examID = rs.getInt("ExamID");
                 String examSubject = rs.getString("ExamSubject");
@@ -1231,8 +1256,7 @@ public class DatabaseConnect { //class for utility functions to access database
             rs.close();
             stmt.close();
             bSelect = true;
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
@@ -1251,9 +1275,13 @@ public class DatabaseConnect { //class for utility functions to access database
         LinkedList<Exam> tempExams = new LinkedList<>();
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT Exams.ExamID, Exams.ExamSubject, Exams.RoomTypeRequired, Timetable.WeekNumber, Timetable.PeriodNumber, Timetable.RoomID," +
-                    " Room.Capacity, Timetable.InvigilatorID, Invigilator.ContractedExamsLeft FROM Timetable, Exams, Invigilator, Room " +
-                    "WHERE Exams.ExamID = Timetable.ExamID AND Room.RoomID = Timetable.RoomID AND Invigilator.InvigilatorID = Timetable.InvigilatorID AND Timetable.InvigilatorID = " + invID + "  ORDER BY Exams.ExamID ASC;");
+            rs = stmt.executeQuery(
+                    "SELECT Exams.ExamID, Exams.ExamSubject, Exams.RoomTypeRequired, Timetable.WeekNumber, Timetable.PeriodNumber, Timetable.RoomID,"
+                            +
+                            " Room.Capacity, Timetable.InvigilatorID, Invigilator.ContractedExamsLeft FROM Timetable, Exams, Invigilator, Room "
+                            +
+                            "WHERE Exams.ExamID = Timetable.ExamID AND Room.RoomID = Timetable.RoomID AND Invigilator.InvigilatorID = Timetable.InvigilatorID AND Timetable.InvigilatorID = "
+                            + invID + "  ORDER BY Exams.ExamID ASC;");
             while (rs.next()) {
                 int examID = rs.getInt("ExamID");
                 String examSubject = rs.getString("ExamSubject");
@@ -1282,8 +1310,7 @@ public class DatabaseConnect { //class for utility functions to access database
             rs.close();
             stmt.close();
             bSelect = true;
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
@@ -1302,11 +1329,15 @@ public class DatabaseConnect { //class for utility functions to access database
         LinkedList<Exam> tempExams = new LinkedList<>();
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT Exams.ExamID, Exams.ExamSubject, Exams.RoomTypeRequired, Timetable.WeekNumber, Timetable.PeriodNumber, Timetable.RoomID," +
-                    " Room.Capacity, Timetable.InvigilatorID, Invigilator.ContractedExamsLeft FROM Timetable, Exams, Invigilator, Room, ExamEnrolment " +
-                    "WHERE Exams.ExamID = Timetable.ExamID AND Room.RoomID = Timetable.RoomID AND " +
-                    "Invigilator.InvigilatorID = Timetable.InvigilatorID AND " +
-                    "ExamEnrolment.ExamID = Timetable.ExamID AND ExamEnrolment.ClassID = " + classID + "  ORDER BY Exams.ExamID ASC;");
+            rs = stmt.executeQuery(
+                    "SELECT Exams.ExamID, Exams.ExamSubject, Exams.RoomTypeRequired, Timetable.WeekNumber, Timetable.PeriodNumber, Timetable.RoomID,"
+                            +
+                            " Room.Capacity, Timetable.InvigilatorID, Invigilator.ContractedExamsLeft FROM Timetable, Exams, Invigilator, Room, ExamEnrolment "
+                            +
+                            "WHERE Exams.ExamID = Timetable.ExamID AND Room.RoomID = Timetable.RoomID AND " +
+                            "Invigilator.InvigilatorID = Timetable.InvigilatorID AND " +
+                            "ExamEnrolment.ExamID = Timetable.ExamID AND ExamEnrolment.ClassID = " + classID
+                            + "  ORDER BY Exams.ExamID ASC;");
             while (rs.next()) {
                 int examID = rs.getInt("ExamID");
                 String examSubject = rs.getString("ExamSubject");
@@ -1335,8 +1366,7 @@ public class DatabaseConnect { //class for utility functions to access database
             rs.close();
             stmt.close();
             bSelect = true;
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)
@@ -1355,10 +1385,15 @@ public class DatabaseConnect { //class for utility functions to access database
         LinkedList<Exam> tempExams = new LinkedList<>();
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT Exams.ExamID, Exams.ExamSubject, Exams.RoomTypeRequired, Timetable.WeekNumber, Timetable.PeriodNumber, Timetable.RoomID," +
-                    " Room.Capacity, Timetable.InvigilatorID, Invigilator.ContractedExamsLeft FROM Timetable, Exams, Invigilator, Room, ExamEnrolment, ClassEnrolment " +
-                    "WHERE Exams.ExamID = Timetable.ExamID AND Room.RoomID = Timetable.RoomID AND Invigilator.InvigilatorID = Timetable.InvigilatorID AND " +
-                    "ExamEnrolment.ExamID = Timetable.ExamID AND ExamEnrolment.ClassID = ClassEnrolment.ClassID AND ClassEnrolment.StudentID = " + studentID + "  ORDER BY Exams.ExamID ASC;");
+            rs = stmt.executeQuery(
+                    "SELECT Exams.ExamID, Exams.ExamSubject, Exams.RoomTypeRequired, Timetable.WeekNumber, Timetable.PeriodNumber, Timetable.RoomID,"
+                            +
+                            " Room.Capacity, Timetable.InvigilatorID, Invigilator.ContractedExamsLeft FROM Timetable, Exams, Invigilator, Room, ExamEnrolment, ClassEnrolment "
+                            +
+                            "WHERE Exams.ExamID = Timetable.ExamID AND Room.RoomID = Timetable.RoomID AND Invigilator.InvigilatorID = Timetable.InvigilatorID AND "
+                            +
+                            "ExamEnrolment.ExamID = Timetable.ExamID AND ExamEnrolment.ClassID = ClassEnrolment.ClassID AND ClassEnrolment.StudentID = "
+                            + studentID + "  ORDER BY Exams.ExamID ASC;");
             while (rs.next()) {
                 int examID = rs.getInt("ExamID");
                 String examSubject = rs.getString("ExamSubject");
@@ -1387,8 +1422,7 @@ public class DatabaseConnect { //class for utility functions to access database
             rs.close();
             stmt.close();
             bSelect = true;
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
         if (!bSelect)

@@ -1,4 +1,4 @@
-public class Swap extends Move { //a swap is simply two moves.
+public class Swap extends Move { // a swap is simply two moves.
     private final Exam exam2;
 
     public Swap(Exam exam1, Exam exam2) {

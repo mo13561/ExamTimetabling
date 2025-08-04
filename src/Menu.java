@@ -1,7 +1,7 @@
 import java.time.LocalDate;
 import java.util.Scanner;
 
-public class Menu { //menu class. should be self documenting
+public class Menu { // menu class. should be self documenting
     final Scanner sc = new Scanner(System.in);
 
     private void mainLoop() throws Exception {
@@ -135,7 +135,8 @@ public class Menu { //menu class. should be self documenting
     private void constructTimetable() throws Exception {
         int response;
         do {
-            System.out.println("This will erase any previous timetables constructed, and update room availability. Are you OK with this?");
+            System.out.println(
+                    "This will erase any previous timetables constructed, and update room availability. Are you OK with this?");
             System.out.println("1 -> YES");
             System.out.println("2 -> Return");
             response = sc.nextInt();
@@ -168,7 +169,8 @@ public class Menu { //menu class. should be self documenting
         DatabaseConnect conn = new DatabaseConnect();
         Invigilator[] invigilators = conn.getAllInvigilators();
         for (Invigilator invigilator : invigilators) {
-            conn.editInvigilatorExamsLeft(invigilator.getInvID(), invigilator.getExamsLeft() - conn.getExamsInvigilated(invigilator.getInvID()));
+            conn.editInvigilatorExamsLeft(invigilator.getInvID(),
+                    invigilator.getExamsLeft() - conn.getExamsInvigilated(invigilator.getInvID()));
         }
         conn.close();
     }
@@ -527,7 +529,7 @@ public class Menu { //menu class. should be self documenting
         timeslots = conn.getAvailableTimeslots();
         conn.close();
         for (int i = 0; i < timeslots.length; i++) {
-            System.out.println("Timeslot " + i + " : " +  timeslots[i]);
+            System.out.println("Timeslot " + i + " : " + timeslots[i]);
         }
     }
 
@@ -546,7 +548,7 @@ public class Menu { //menu class. should be self documenting
             System.out.println("Enter Period Number ->");
             periodNumber = sc.nextInt();
         }
-        return new int[]{weekNumber, periodNumber};
+        return new int[] { weekNumber, periodNumber };
     }
 
     private void makeTimeslotUnavailable() throws Exception {
@@ -562,7 +564,8 @@ public class Menu { //menu class. should be self documenting
 
     private void addAvailableTimeslot() throws Exception {
         int[] timeslot = getTimeSlotInput();
-        int weekNumber = timeslot[0]; int periodNumber = timeslot[1];
+        int weekNumber = timeslot[0];
+        int periodNumber = timeslot[1];
         DatabaseConnect conn = new DatabaseConnect();
         if (conn.timeslotInDatabase(weekNumber, periodNumber)) {
             conn.setTimeSlot(weekNumber, periodNumber, true);

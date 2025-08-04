@@ -1,4 +1,4 @@
-public class Hashmap<K, T> {//generic hashmap modulus current size of hashmap, dynamic.
+public class Hashmap<K, T> {// generic hashmap modulus current size of hashmap, dynamic.
     class KeyValue<V> {
         private final int key;
         private int position;
@@ -40,7 +40,8 @@ public class Hashmap<K, T> {//generic hashmap modulus current size of hashmap, d
             return unconvertedKey;
         }
     }
-    private int maxSize = 11; //starting modulus and length is 11
+
+    private int maxSize = 11; // starting modulus and length is 11
     private int modulus = 11;
     private int length = 0;
     private KeyValue<T>[] map;
@@ -130,6 +131,7 @@ public class Hashmap<K, T> {//generic hashmap modulus current size of hashmap, d
         }
         return map[posFind(key)].getValue();
     }
+
     public KeyValue<T> getKeyValue(int key) throws IllegalArgumentException {
         if (!contains(key)) {
             throw new IllegalArgumentException("The given key does not exist.");
@@ -188,7 +190,8 @@ public class Hashmap<K, T> {//generic hashmap modulus current size of hashmap, d
         int key = keyToInt(genKey);
         int pos = key % this.modulus;
         for (int i = 0; i < this.maxSize; i++) {
-            if (map[pos] == null) continue;
+            if (map[pos] == null)
+                continue;
             if (map[pos].getKey() == key && map[pos].getUnconvertedKey().toString().equals(genKey.toString())) {
                 return true;
             }
@@ -219,7 +222,8 @@ public class Hashmap<K, T> {//generic hashmap modulus current size of hashmap, d
             if (map[i] == null) {
                 continue;
             }
-            display.append("[ ").append(map[i].getUnconvertedKey()).append(" : ").append(map[i].getValue()).append(" ]");
+            display.append("[ ").append(map[i].getUnconvertedKey()).append(" : ").append(map[i].getValue())
+                    .append(" ]");
         }
         return display.toString();
     }
